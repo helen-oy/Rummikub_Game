@@ -3,6 +3,7 @@ import pygame
 import sys
 import random
 
+# import game_objects
 # Initialize Pygame
 pygame.init()
 
@@ -16,6 +17,8 @@ YELLOW = (250,250,0)
 WHITE = (255,255,255)
 PURPLE = (128,0,128)
 
+tile_colors = [RED,BLUE,GREEN,YELLOW,PURPLE]
+
 # Classes
 class Tile:
     def __init__(self, value, color):
@@ -25,10 +28,11 @@ class Tile:
         self.image = pygame.image.load('tile.png')
 
     def draw(self, x, y):
+        screen.blit(self.image, (x, y))
         # pygame.draw.rect(screen, self.color, (x, y, self.width, self.height))
         font = pygame.font.Font(None, 36)
-        text = font.render(str(self.value), True, BLUE)
-        screen.blit(self.image, (x, y))
+        text = font.render(str(self.value), True, self.color)
+        screen.blit(text, (x+3, y+3))
     
     # Create tiles with values 1-15 and F
 
@@ -59,19 +63,38 @@ class Pool:
 
     def remove_picked_tiles(self):
         self.tiles.pop() # to be improved
+        return self.tiles()
+
+# define class sets which holds runs and groups 
+class Sets:
+    def __init__(self,tiles):
+        self.tiles = tiles
+
+    def create(self):
+        pass
+
+class Group(Sets):
+    def __init__(self):
+        super().__init__()
+
+    def create_group(self):
+        pass
+
+class Runs(Sets):
+    def __init__(self):
+        super().__init__()
+
+    def create_run(self):
+        pass
 
         
 
 class Player:
     def __init__(self,rack):
         self.rack = rack
-    
 
-
-
-
-
-
+    def pick_tiles(self):
+        pass
 
 
 
@@ -80,7 +103,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Rummikub")
 
 # Create tiles
-tile_colors = [RED,BLUE,GREEN,YELLOW,PURPLE]
+
 
 
 # Shuffle tiles
@@ -96,7 +119,7 @@ while running:
     # Draw tiles
     screen.fill(WHITE)
     x, y = 50, 50
-    for tile in tiles:
+    for tile in Pool().tiles:
         print(tile.value,tile.color)
         tile.draw(x, y)
         x += 70  # Spacing between tiles
