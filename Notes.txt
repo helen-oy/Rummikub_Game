@@ -1,0 +1,11 @@
+# Please do not write any code to the jupyter notebook file, "run_game.ipynb".
+# The file sole exists to test/run our main code in jupyter lab.
+# Changes should be pushed to the relevant .py files.
+
+Extension Ideas:
+
+1. Multiple rounds
+
+Questions:
+
+if the rack has a finite size, what happens when the player rack is full?
