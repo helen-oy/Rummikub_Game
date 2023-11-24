@@ -119,3 +119,11 @@ class GameBoard:
                         set = [] # if the move was valid, set should be reset
                 
 
+def is_valid_move(list_of_tiles):
+        # Checking if it is a run even/odd
+    if 3<=len(list_of_tiles)<=5:
+        all_odd_or_even = all(t.value % 2==0 for t in list_of_tiles) or all(t.value % 2!=0 for t in list_of_tiles) 
+        diff_2 = all(list_of_tiles[i+1].value-list_of_tiles[i].value==2 for i in range(len(list_of_tiles)-1))
+        same_color = all(list_of_tiles[i+1].color==list_of_tiles[i].color for i in range(len(list_of_tiles)-1))
+
+        return all_odd_or_even and diff_2 and same_color
