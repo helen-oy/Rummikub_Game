@@ -1,6 +1,10 @@
 import pygame
 import sys
 import random
+import game_constants
+
+tile_height = game_constants.tile_height
+tile_width = game_constants.tile_width
 
 # list_of_players contains all the players in the game in order of their decided turns
 def change_turns(list_of_players, Current_Player,Next_Player): 
@@ -72,4 +76,46 @@ class Player:
     # After this action, set players turn to False
 
 class GameBoard:
-    def 
+    #rect (left/x, top/y, width, height)
+    def __init__(self):
+        self.board = [] # initialise the game board as an empty list.
+        for i in range(8): # outer loop for the 8 rows
+            new_row = []
+            for j in range(22): # inner loop for the columns
+                row.append(pygame.Rect(i * 30, j * 30), tile_width, tile_height) # agree with Iram how much gameboard tiles should be spaced apart.
+            self.board.append(new_row)
+
+    def validate_board(self, tiles_in_play): # function takes in a list of all the tiles that have been drawn
+        # each time a tile is drawn, the visual representation and data must be linked using a dictionary.
+        # In the dictionary, the key will be the rect objecct that represents the tile while the value will be the tile object
+        # when two tiles are drawn from pool and one is returned, the returned tile must be removed from the dictionary and their rect object deleted
+        # if dictionary is used for link, then each time a tile is drawn it must also be added to a list called colliders
+        # If tiles are drawn using sprite, they can be given an id that links them to tile object.
+        # if use sprite, tiles_in_play is list of sprites. sprite.id will lxike back to tile. sprite.rect, its rect. This is not bad tbh
+  
+        for each_row in self.board: # outer loop, checks each row
+            set = [] # store our runs and groups
+            for each_space in each_row: # checks each space in that row
+                occupied = False # lets us know if a space is occupied or not
+                # looks at the list of tiles currently in the game and checks if any is colliding with the gameboard space
+                for tile in tiles_in_play: 
+                    if tile.rect.colliderect(each_space): #alternatively, we can check if their positions match
+                        occupied = True # the space is indeed occupied
+                        # set.append(tile_dict(tile))# use the dictionary to add the tile represented by the object in collision with the gameboard
+                        break # exit this loop since only one tile can be in a spot
+                        
+                if not occupied: # if the space is empty
+                    if set: # if set is not empty by the time we run into an empty space
+                        is_valid = self.is_valid_move(set) # check if it is a valid group or run
+                        if is_valid == False: # if the move is not valid, validate_board should return false
+                            return False
+                        else:
+                            set = [] # if the move was valid, set should be reset
+            if set: # if the set is not empty after we reach the end of the row
+                is_valid = self.is_valid_move(set) # check if it is a valid group or run
+                    if is_valid == False: # if the move is not valid, validate_board should return false
+                        return False
+                    else:
+                        set = [] # if the move was valid, set should be reset
+                
+
