@@ -9,4 +9,4 @@ WHITE = (255,255,255)
 PURPLE = (128,0,128)
 
 tile_colours = [RED,BLUE,GREEN,YELLOW,PURPLE]
-tile_height, tile_width = 50,50
+TILE_HEIGHT, TILE_WIDTH = 50,50
