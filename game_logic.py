@@ -124,10 +124,17 @@ def is_valid_move(list_of_tiles):
         all_odd_or_even = all(t.value % 2==0 for t in list_of_tiles) or all(t.value % 2!=0 for t in list_of_tiles) 
         diff_2 = all(list_of_tiles[i+1].value-list_of_tiles[i].value==2 for i in range(len(list_of_tiles)-1))
         same_color = all(list_of_tiles[i+1].color==list_of_tiles[i].color for i in range(len(list_of_tiles)-1))
-
-        return all_odd_or_even and diff_2 and same_color
-    # to be continued
-    
+        # Checking if the list meet all conditions to be a run
+        run = all_odd_or_even and diff_2 and same_color
+        if run:
+            return run
+        else: # Check whether it is a group
+            same_value = all(list_of_tiles[i+1].value==list_of_tiles[i].value for i in range(len(list_of_tiles)-1))
+            different_color = len(set([t.color for t in list_of_tiles]))==len(list_of_tiles)
+            group = same_value and different_color
+            return group                 
+    else:
+        return False
 
 class Tile:
     def __init__(self, value, color):
