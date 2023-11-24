@@ -127,3 +127,6 @@ def is_valid_move(list_of_tiles):
         same_color = all(list_of_tiles[i+1].color==list_of_tiles[i].color for i in range(len(list_of_tiles)-1))
 
         return all_odd_or_even and diff_2 and same_color
+    # to be continued
+    
+	
