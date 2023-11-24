@@ -1,10 +1,9 @@
 import pygame
 import sys
 import random
-import game_constants
+from game_constants import *
 
-tile_height = game_constants.tile_height
-tile_width = game_constants.tile_width
+
 
 # list_of_players contains all the players in the game in order of their decided turns
 def change_turns(list_of_players, Current_Player,Next_Player): 
@@ -82,7 +81,7 @@ class GameBoard:
         for i in range(8): # outer loop for the 8 rows
             new_row = []
             for j in range(22): # inner loop for the columns
-                row.append(pygame.Rect(i * 30, j * 30), tile_width, tile_height) # agree with Iram how much gameboard tiles should be spaced apart.
+                row.append(pygame.Rect(i * 30, j * 30), TILE_WIDTH, TILE_HEIGHT) # agree with Iram how much gameboard tiles should be spaced apart.
             self.board.append(new_row)
 
     def validate_board(self, tiles_in_play): # function takes in a list of all the tiles that have been drawn
@@ -134,7 +133,7 @@ class Tile:
     def __init__(self, value, color):
         self.value = value
         self.color = color
-        self.width, self.height = 50, 70
+        self.width, self.height = TILE_WIDTH, TILE_HEIGHT
         # self.image = pygame.image.load('tile.png')
 
 
