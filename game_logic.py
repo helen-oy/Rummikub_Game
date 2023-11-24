@@ -70,3 +70,6 @@ class Player:
     #   self.rack.add_tiles(selected_tiles[0 or 1])
     # send the other tile back to the pool
     # After this action, set players turn to False
+
+class GameBoard:
+    def 
