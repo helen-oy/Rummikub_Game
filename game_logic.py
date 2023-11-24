@@ -3,6 +3,54 @@ import sys
 import random
 from game_constants import *
 
+class Tile:
+    def __init__(self, value, color):
+        self.value = value
+        self.color = color
+        self.width, self.height = TILE_WIDTH, TILE_HEIGHT
+        # self.image = pygame.image.load('tile.png')
+
+
+class Pool:
+    def __init__(self): # initialize pool to generate tiles
+        self.tiles = []
+        self.init_pool()
+ 
+    def init_pool(self):
+        tile_colors = [RED,BLUE,GREEN,BLACK,PURPLE] 
+        self.tiles = [Tile(i % 15 + 1, t) for i in range(30) for t in tile_colors] # create 2 sets of tile colors numbered 1-15
+        random.shuffle(self.tiles)  # shuffle all 150 tiles
+ 
+    def remaining_tiles(self): # count of tiles remaining in pool
+        return len(self.tiles)
+ 
+    def initial_tiles(self): # initial tiles to playes rack
+        send_tiles = [self.tiles.pop(random.randrange(len(self.tiles))) for _ in range(14)]
+        return send_tiles
+ 
+
+
+class Rack:
+    def __init__(self): # initialize rack as an empty list
+        self.tiles = []
+ 
+    def add_tile(self, tile): # choose 2 tiles return one
+        self.tiles.append(tile)
+    
+    def initial_tiles(self,pool): 
+        # This take tiles that were expelled by the pool    
+        # The pool will intialized as an instance of class Pool
+        self.tiles.append(pool.initial_tiles()) 
+ 
+    def sort_tiles(self):
+        odd_tiles = [tile for tile in self.tiles if tile.number % 2 != 0]
+        even_tiles = [tile for tile in self.tiles if tile.number % 2 == 0]
+        # return odd_tiles, even_tiles 
+        # before putting them together, lets sort them by value and color
+        odd_tiles = sorted(odd_tiles,key=lambda x: (x.value,x.color))
+        even_tiles = sorted(even_tiles,key=lambda x: (x.value,x.color))
+        return odd_tiles + even_tiles # i think they should be joined,!!
+	
 
 
 # list_of_players contains all the players in the game in order of their decided turns
@@ -136,51 +184,3 @@ def is_valid_move(list_of_tiles):
     else:
         return False
 
-class Tile:
-    def __init__(self, value, color):
-        self.value = value
-        self.color = color
-        self.width, self.height = TILE_WIDTH, TILE_HEIGHT
-        # self.image = pygame.image.load('tile.png')
-
-
-class Pool:
-    def __init__(self): # initialize pool to generate tiles
-        self.tiles = []
-        self.init_pool()
- 
-    def init_pool(self):
-        tile_colors = [RED,BLUE,GREEN,BLACK,PURPLE] 
-        self.tiles = [Tile(i % 15 + 1, t) for i in range(30) for t in tile_colors] # create 2 sets of tile colors numbered 1-15
-        random.shuffle(self.tiles)  # shuffle all 150 tiles
- 
-    def remaining_tiles(self): # count of tiles remaining in pool
-        return len(self.tiles)
- 
-    def initial_tiles(self): # initial tiles to playes rack
-        send_tiles = [self.tiles.pop(random.randrange(len(self.tiles))) for _ in range(14)]
-        return send_tiles
- 
-
-
-class Rack:
-    def __init__(self): # initialize rack as an empty list
-        self.tiles = []
- 
-    def add_tile(self, tile): # choose 2 tiles return one
-        self.tiles.append(tile)
-    
-    def initial_tiles(self,pool): 
-        # This take tiles that were expelled by the pool    
-        # The pool will intialized as an instance of class Pool
-        self.tiles.append(pool.initial_tiles()) 
- 
-    def sort_tiles(self):
-        odd_tiles = [tile for tile in self.tiles if tile.number % 2 != 0]
-        even_tiles = [tile for tile in self.tiles if tile.number % 2 == 0]
-        # return odd_tiles, even_tiles 
-        # before putting them together, lets sort them by value and color
-        odd_tiles = sorted(odd_tiles,key=lambda x: (x.value,x.color))
-        even_tiles = sorted(even_tiles,key=lambda x: (x.value,x.color))
-        return odd_tiles + even_tiles # i think they should be joined,!!
-	
