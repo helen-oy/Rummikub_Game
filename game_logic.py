@@ -164,7 +164,7 @@ class GameBoard:
                         return False
                     else:
                         set = [] # if the move was valid, set should be reset
-                
+        return True                
 
 def is_valid_move(list_of_tiles):
         # Checking if it is a run even/odd
