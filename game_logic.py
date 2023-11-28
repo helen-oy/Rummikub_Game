@@ -1,6 +1,7 @@
 import pygame
 import sys
 import random
+import copy
 from game_constants import *
 
 class Tile:
@@ -73,6 +74,7 @@ class Player:
         self.name = name
         self.turn = False # when 
 
+    
     def initial_tiles(self,rack): 
         # Add tiles to players rack
         self.rack.append(rack.initial_tiles())
@@ -113,46 +115,64 @@ class Player:
 class GameBoard:
     #rect (left/x, top/y, width, height)
     def __init__(self):
-        self.board = [] # initialise the game board as an empty list.
-        for i in range(8): # outer loop for the 8 rows
+        self.board = [] # initialise the game board as an empty list. 
+        self.rows, self.columns = 9, 20
+        for i in range(self.rows):
             new_row = []
-            for j in range(22): # inner loop for the columns
-                row.append(pygame.Rect(i * 30, j * 30), TILE_WIDTH, TILE_HEIGHT) # agree with Iram how much gameboard tiles should be spaced apart.
+            for j in range(self.columns):
+                new_row.append(None)
             self.board.append(new_row)
 
-    def validate_board(self, tiles_in_play): # function takes in a list of all the tiles that have been drawn
-        # each time a tile is drawn, the visual representation and data must be linked using a dictionary.
-        # In the dictionary, the key will be the rect objecct that represents the tile while the value will be the tile object
-        # when two tiles are drawn from pool and one is returned, the returned tile must be removed from the dictionary and their rect object deleted
-        # if dictionary is used for link, then each time a tile is drawn it must also be added to a list called colliders
-        # If tiles are drawn using sprite, they can be given an id that links them to tile object.
-        # if use sprite, tiles_in_play is list of sprites. sprite.id will lxike back to tile. sprite.rect, its rect. This is not bad tbh
-  
-        for each_row in self.board: # outer loop, checks each row
+    def validate_board(self, game_board): 
+        # game_board is the current state of the gameboard - a 9 by 20 matrix of tile objects passed in from frontend.
+
+        # this function returns a list [boolean, list]
+        # the boolean let's us know if the board is valid or not
+        # the list contains each position of the tiles on the board that form invalid game play.
+
+        invalid_positions = []
+        status = True
+        tile_pos = {}
+        i, j = 0,0
+        
+        for each_row in game_board: # outer loop, checks each row 
             set = [] # store our runs and groups
-            for each_space in each_row: # checks each space in that row
-                occupied = False # lets us know if a space is occupied or not
-                # looks at the list of tiles currently in the game and checks if any is colliding with the gameboard space
-                for tile in tiles_in_play: 
-                    if tile.rect.colliderect(each_space): #alternatively, we can check if their positions match
-                        occupied = True # the space is indeed occupied
-                        # set.append(tile_dict(tile))# use the dictionary to add the tile represented by the object in collision with the gameboard
-                        break # exit this loop since only one tile can be in a spot
-                        
-                if not occupied: # if the space is empty
+            for element in each_row: # checks each space/element in that row
+                if element != None:
+                    set.append(element) # add that tile to our set
+                    tile_pos[element] = str(i) + "," + str(j)
+                            
+                if element == None: # if the current element in the row is an empty space
                     if set: # if set is not empty by the time we run into an empty space
                         is_valid = self.is_valid_move(set) # check if it is a valid group or run
-                        if is_valid == False: # if the move is not valid, validate_board should return false
-                            return False
+                        if is_valid == False: # if the move is not valid, add the positions of all invalid tiles to invalid positions
+                            status = False
+                            for tile in set:
+                                invalid_positions.append(tile_pos[tile])
+                            set = [] # clear set for the next sets.
                         else:
-                            set = [] # if the move was valid, set should be reset
+                            set = [] # if the move was valid, set only clear set.
+                j += 1 # update the column position as we move through the row.
+                
             if set: # if the set is not empty after we reach the end of the row
                 is_valid = self.is_valid_move(set) # check if it is a valid group or run
-                    if is_valid == False: # if the move is not valid, validate_board should return false
-                        return False
-                    else:
-                        set = [] # if the move was valid, set should be reset
-                
+                if is_valid == False: # if the move is not valid, add the positions of all invalid tiles to invalid positions
+                    status = False
+                    for tile in set:
+                        invalid_positions.append(tile_pos[tile])
+                    set = [] # clear set for the next sets.
+                else:
+                    set = [] # if the move was valid, set should be reset
+            i += 1 # update the row position as we move through the board
+            
+        if status: # if thr board is valid, update the gameboard
+            self.board = copy.deepcopy(game_board)
+            
+        return [status, invalid_positions]
+
+    def get_copy(self):
+        return copy.deepcopy(self.board)
+        
 
 def is_valid_move(list_of_tiles):
         # Checking if it is a run even/odd
@@ -171,4 +191,3 @@ def is_valid_move(list_of_tiles):
             return group                 
     else:
         return False
-
