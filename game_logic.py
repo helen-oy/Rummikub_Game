@@ -73,6 +73,7 @@ class Player:
         self.rack = []
         self.name = name
         self.turn = False # when 
+        self.is_greater_30 = False
 
     
     def initial_tiles(self,rack): 
@@ -103,11 +104,6 @@ class Player:
     # send the other tile back to the pool
     # After this action, set players turn to False
  
-        
-    
-		
-
-	
     #     return self.pick_tile_from_rack()
         # board.append(tile) append tile to the board if it forms a valid set or run
         ## add the picked tile to game board to form a set or run
@@ -189,5 +185,20 @@ def is_valid_move(list_of_tiles):
             different_color = len(set([t.color for t in list_of_tiles]))==len(list_of_tiles)
             group = same_value and different_color
             return group                 
+    else:
+        return False
+    
+    # If it is the players turn for the first attempt to play, the board is valid if total value for sets or runs or both
+    # only if sum is >30
+    # This fucnction must be implemented jointly implemented with `is_valid_move` that is, both conditions must be met
+    # for a player to countinue playing, if not the player has to draw card from the pool
+    # This is a simple function that returns a bool `True` if greater than thirty
+    # Eventually when the both `is_valid_move` and `is_more_than_30` return True, the player attribute is_greater_30 is set to True
+    # The player is then allowed to play
+
+def is_more_than_30(list_of_tiles):
+    if is_valid_move(list_of_tiles):
+        sum(list_of_tiles)>30
+        return True
     else:
         return False
