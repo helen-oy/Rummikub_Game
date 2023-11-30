@@ -44,8 +44,8 @@ class Rack:
         self.tiles.append(pool.initial_tiles()) 
  
     def sort_tiles(self):
-        odd_tiles = [tile for tile in self.tiles if tile.number % 2 != 0]
-        even_tiles = [tile for tile in self.tiles if tile.number % 2 == 0]
+        odd_tiles = [tile for tile in self.tiles if tile.value % 2 != 0]
+        even_tiles = [tile for tile in self.tiles if tile.value % 2 == 0]
         # return odd_tiles, even_tiles 
         # before putting them together, lets sort them by value and color
         odd_tiles = sorted(odd_tiles,key=lambda x: (x.value,x.color))
@@ -119,8 +119,9 @@ class GameBoard:
                 new_row.append(None)
             self.board.append(new_row)
 
-    def validate_board(self, game_board): 
+    def validate_board(self, game_board, current_player):
         # game_board is the current state of the gameboard - a 9 by 20 matrix of tile objects passed in from frontend.
+        # current_player is the player whose turn it is. we need to check if they have played 30 points or not
 
         # this function returns a list [boolean, list]
         # the boolean let's us know if the board is valid or not
@@ -140,7 +141,7 @@ class GameBoard:
                             
                 if element == None: # if the current element in the row is an empty space
                     if set: # if set is not empty by the time we run into an empty space
-                        is_valid = self.is_valid_move(set) # check if it is a valid group or run
+                        is_valid = is_valid_move(current_player, set) # check if it is a valid group or run
                         if is_valid == False: # if the move is not valid, add the positions of all invalid tiles to invalid positions
                             status = False
                             for tile in set:
@@ -151,7 +152,7 @@ class GameBoard:
                 j += 1 # update the column position as we move through the row.
                 
             if set: # if the set is not empty after we reach the end of the row
-                is_valid = self.is_valid_move(set) # check if it is a valid group or run
+                is_valid = is_valid_move(current_player, set) # check if it is a valid group or run
                 if is_valid == False: # if the move is not valid, add the positions of all invalid tiles to invalid positions
                     status = False
                     for tile in set:
@@ -170,7 +171,7 @@ class GameBoard:
         return copy.deepcopy(self.board)
         
 
-def is_valid_move(list_of_tiles):
+def is_valid_move(current_player, list_of_tiles):
         # Checking if it is a run even/odd
     if 3<=len(list_of_tiles)<=5:
         all_odd_or_even = all(t.value % 2==0 for t in list_of_tiles) or all(t.value % 2!=0 for t in list_of_tiles) 
@@ -179,12 +180,24 @@ def is_valid_move(list_of_tiles):
         # Checking if the list meet all conditions to be a run
         run = all_odd_or_even and diff_2 and same_color
         if run:
-            return run
+            if current_player.is_greater_30 == False:
+                valid = is_more_than_30(list_of_tiles)
+                if valid:
+                    current_player.is_greater_30 = True
+                return valid
+            else
+                return run
         else: # Check whether it is a group
             same_value = all(list_of_tiles[i+1].value==list_of_tiles[i].value for i in range(len(list_of_tiles)-1))
             different_color = len(set([t.color for t in list_of_tiles]))==len(list_of_tiles)
             group = same_value and different_color
-            return group                 
+            if current_player.is_greater_30 == False:
+                valid = is_more_than_30(list_of_tiles)
+                if valid:
+                    current_player.is_greater_30 = True
+                return valid
+            else
+                return group                 
     else:
         return False
     
@@ -197,8 +210,7 @@ def is_valid_move(list_of_tiles):
     # The player is then allowed to play
 
 def is_more_than_30(list_of_tiles):
-    if is_valid_move(list_of_tiles):
-        sum(list_of_tiles)>30
+    if sum(list_of_tiles)>30
         return True
     else:
         return False
