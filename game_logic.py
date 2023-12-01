@@ -1,117 +1,141 @@
-import pygame
-import sys
 import random
 import copy
-from game_constants import *
+
+# Constants
+WIDTH, HEIGHT = 800, 600
+FPS = 60
+BLUE = (0, 0, 180)
+RED = (180, 0, 0)
+GREEN = (0, 180, 0)
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+PURPLE = (128, 0, 128)
+
+
+# screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 class Tile:
     def __init__(self, value, color):
         self.value = value
         self.color = color
-        self.width, self.height = TILE_WIDTH, TILE_HEIGHT
-        # self.image = pygame.image.load('tile.png')
 
-
+# Classes
 class Pool:
-    def __init__(self): # initialize pool to generate tiles
+    def __init__(self):  # Ideally the pool starts with a pool with all 150 tiles
         self.tiles = []
         self.init_pool()
- 
+
     def init_pool(self):
-        tile_colors = [RED,BLUE,GREEN,BLACK,PURPLE] 
-        self.tiles = [Tile(i % 15 + 1, t) for i in range(30) for t in tile_colors] # create 2 sets of tile colors numbered 1-15
-        random.shuffle(self.tiles)  # shuffle all 150 tiles
- 
-    def remaining_tiles(self): # count of tiles remaining in pool
+        tile_colors = [RED, BLUE, GREEN, BLACK, PURPLE]  # modified to incorporate RGB combinations
+        self.tiles = [Tile(i % 15 + 1, t) for i in range(30) for t in tile_colors]
+        random.shuffle(self.tiles)
+
+    def remaining_tiles(self):
         return len(self.tiles)
- 
-    def initial_tiles(self): # initial tiles to playes rack
+
+    def initial_tiles(
+            self):  # what I think is to remove rack frm here, then the rack will call this method to add tiles
+        # I see it can potentially create problems..
+        # why 14 tiles not 16
         send_tiles = [self.tiles.pop(random.randrange(len(self.tiles))) for _ in range(14)]
+        send_tiles = send_tiles + [None] * (40 - len(send_tiles))
         return send_tiles
- 
+
+    def draw_2_tiles(self):
+        selected_tiles = [self.tiles.pop(random.randrange(len(self.tiles))) for _ in range(2)]
+        tile1 = selected_tiles[0]
+        tile2 = selected_tiles[1]
+
+        return [tile1, tile2]
 
 
 class Rack:
-    def __init__(self): # initialize rack as an empty list
-        self.tiles = []
- 
-    def add_tile(self, tile): # choose 2 tiles return one
-        self.tiles.append(tile)
-    
-    def initial_tiles(self,pool): 
-        # This take tiles that were expelled by the pool    
+    def __init__(self, tiles):
+        self.tiles = tiles
+
+    def initial_tiles(self, pool):
+        # This take tiles that were expelled by the pool
         # The pool will intialized as an instance of class Pool
-        self.tiles.append(pool.initial_tiles()) 
- 
+        self.tiles.extend(pool.initial_tiles())
+        return (self.tiles)
+
     def sort_tiles(self):
         odd_tiles = [tile for tile in self.tiles if tile.value % 2 != 0]
         even_tiles = [tile for tile in self.tiles if tile.value % 2 == 0]
-        # return odd_tiles, even_tiles 
+        # return odd_tiles, even_tiles
         # before putting them together, lets sort them by value and color
-        odd_tiles = sorted(odd_tiles,key=lambda x: (x.value,x.color))
-        even_tiles = sorted(even_tiles,key=lambda x: (x.value,x.color))
-        return odd_tiles + even_tiles # i think they should be joined,!!
-	
+        odd_tiles = sorted(odd_tiles, key=lambda x: (x.value, x.color))
+        even_tiles = sorted(even_tiles, key=lambda x: (x.value, x.color))
+        return odd_tiles + even_tiles  # i think they should be joined,!!
+
+    # def move_tile(self, tile_number):  # is this the tile that is going to be played?
+    #     for i, tile in enumerate(self.tiles):
+    #         if tile.number == tile_number:
+    #             moved_tile = self.tiles.pop(i)
+    #             return moved_tile
+    #     return None
+    def remove_tile(self, position):
+        self.tiles[position] = None
+
+    def add_tile(self, tile, position):
+        self.tiles[position] = tile
 
 
-# list_of_players contains all the players in the game in order of their decided turns
-def change_turns(list_of_players, Current_Player,Next_Player): 
-	if Current_Player.turn == False: # If it is no longer the current player's turn
-		index = list_of_players.index(Current_Player) # get the position of the current player in list of players
-		Next_Player.turn = True # set the next player's turn to true
-		Current_Player = Next_Player # update the current player
-		if index < len(list_of_players) - 1: # as long as we have not reached the end of our list of players
-			new_index = list_of_players.index(Current_Player) + 1 # the next player is the player beside our updated current player
-		else:
-			new_index = 0 # else if we have reached the end of the list, cycle back to the first player
-		Next_Player = list_of_players[new_index] # update the next player
-	return Current_Player, Next_Player # return the current and next player so that their values can be set outside the function
-
+#     # def remove_picked_tiles(self):
+#     #     for _ in range(picked_tiles):
+#     #         self.tiles.pop()
+#     #     return self.tiles
+# # Crate an instance of Pool object to be used by players
 
 class Player:
-    def __init__(self,name):
-        self.rack = []
+    def __init__(self, name, tiles):
+        self.rack = Rack(tiles)
         self.name = name
-        self.turn = False # when 
-        self.is_greater_30 = False
 
-    
-    def initial_tiles(self,rack): 
-        # Add tiles to players rack
-        self.rack.append(rack.initial_tiles())
-    
-    def play_tile(self,tile): # does this require a parameter? unsure: idea human player clicks/or drags the tile, it captures the tile
-        index = self.rack.index(tile) if tile in self.rack else None
-        picked_tile = self.rack.pop(index)
-        return picked_tile
-    
-    # get total value of tiles in the rack: to compute total points when the game ends
-    def get_total_value(self):
-        value = 0
-        for tile in self.rack.tiles:
-            value += tile.value
-        return value
-    
-    # 
-    def pick_tiles(self, pool): 
-        selected_tiles = [pool.tiles.pop(random.randrange(len(pool.tiles))) for _ in range(2)]
-        tile1 = selected_tiles[0]
-        tile2 = selected_tiles[1]
-        return selected_tiles
-        # show selected tiles on the screen
-    # Detect mouse collision, both tiles will wait MOUSEBOTTONDOWN event, the clicked tile, added to rack
-    #   self.rack.add_tiles(selected_tiles[0 or 1])
-    # send the other tile back to the pool
-    # After this action, set players turn to False
- 
-    #     return self.pick_tile_from_rack()
-        # board.append(tile) append tile to the board if it forms a valid set or run
-        ## add the picked tile to game board to form a set or run
+    def initial_tiles(self, pool):
+        return self.rack.initial_tiles(pool)
+
+    def sort_tiles(self):
+        self.rack.sort_tiles()
+
+    def remove_tile(self, position):
+        self.rack.remove_tile(position)
+
+    def add_tile(self, tile, position):
+        self.rack.add_tile(tile, position)
+
+    def get_tiles(self):
+        return self.rack.tiles
+
+
+# bukayo = Player('Bukayo Saka')
+##  This needs a game board
+class ValidMoves:
+    def __init__(self, board):
+        self.board = board
+
+    # validate player moves
+    def is_run(self):
+        if 3 <= len(self.player.run) <= 5:
+            if all(j.value % 2 == 0 for _, j in enumerate(self.player.run)):
+                if all(self.player.run[i + 1].value - self.player.run[i].value == 2 for i, _ in
+                       enumerate(self.player.run[:-1])):
+                    return True
+                else:
+                    return False
+
+    def is_group(self):
+        if 3 <= len(self.player.run) <= 5:
+            if all(i == j for i, j in zip(self.player.run, self.player.run)):
+                if all(self.player.run[i + 1].color != self.player.run[i] for i, j in enumerate(self.player.run[:-1])):
+                    pass
+                ## to be completed
+
 
 class GameBoard:
-    #rect (left/x, top/y, width, height)
+    # rect (left/x, top/y, width, height)
     def __init__(self):
-        self.board = [] # initialise the game board as an empty list. 
+        self.board = []  # initialise the game board as an empty list.
         self.rows, self.columns = 9, 20
         for i in range(self.rows):
             new_row = []
@@ -130,53 +154,53 @@ class GameBoard:
         invalid_positions = []
         status = True
         tile_pos = {}
-        i, j = 0,0
-        
-        for each_row in game_board: # outer loop, checks each row 
-            set = [] # store our runs and groups
-            for element in each_row: # checks each space/element in that row
+        i, j = 0, 0
+
+        for each_row in game_board:  # outer loop, checks each row
+            set = []  # store our runs and groups
+            for element in each_row:  # checks each space/element in that row
                 if element != None:
-                    set.append(element) # add that tile to our set
+                    set.append(element)  # add that tile to our set
                     tile_pos[element] = str(i) + "," + str(j)
-                            
-                if element == None: # if the current element in the row is an empty space
-                    if set: # if set is not empty by the time we run into an empty space
-                        is_valid = is_valid_move(current_player, set) # check if it is a valid group or run
-                        if is_valid == False: # if the move is not valid, add the positions of all invalid tiles to invalid positions
+
+                if element == None:  # if the current element in the row is an empty space
+                    if set:  # if set is not empty by the time we run into an empty space
+                        is_valid = is_valid_move(current_player, set)  # check if it is a valid group or run
+                        if is_valid == False:  # if the move is not valid, add the positions of all invalid tiles to invalid positions
                             status = False
                             for tile in set:
                                 invalid_positions.append(tile_pos[tile])
-                            set = [] # clear set for the next sets.
+                            set = []  # clear set for the next sets.
                         else:
-                            set = [] # if the move was valid, set only clear set.
-                j += 1 # update the column position as we move through the row.
-                
-            if set: # if the set is not empty after we reach the end of the row
-                is_valid = is_valid_move(current_player, set) # check if it is a valid group or run
-                if is_valid == False: # if the move is not valid, add the positions of all invalid tiles to invalid positions
+                            set = []  # if the move was valid, set only clear set.
+                j += 1  # update the column position as we move through the row.
+
+            if set:  # if the set is not empty after we reach the end of the row
+                is_valid = is_valid_move(current_player, set)  # check if it is a valid group or run
+                if is_valid == False:  # if the move is not valid, add the positions of all invalid tiles to invalid positions
                     status = False
                     for tile in set:
                         invalid_positions.append(tile_pos[tile])
-                    set = [] # clear set for the next sets.
+                    set = []  # clear set for the next sets.
                 else:
-                    set = [] # if the move was valid, set should be reset
-            i += 1 # update the row position as we move through the board
-            
-        if status: # if thr board is valid, update the gameboard
+                    set = []  # if the move was valid, set should be reset
+            i += 1  # update the row position as we move through the board
+
+        if status:  # if thr board is valid, update the gameboard
             self.board = copy.deepcopy(game_board)
-            
+
         return [status, invalid_positions]
 
     def get_copy(self):
         return copy.deepcopy(self.board)
-        
+
 
 def is_valid_move(current_player, list_of_tiles):
-        # Checking if it is a run even/odd
-    if 3<=len(list_of_tiles)<=5:
-        all_odd_or_even = all(t.value % 2==0 for t in list_of_tiles) or all(t.value % 2!=0 for t in list_of_tiles) 
-        diff_2 = all(list_of_tiles[i+1].value-list_of_tiles[i].value==2 for i in range(len(list_of_tiles)-1))
-        same_color = all(list_of_tiles[i+1].color==list_of_tiles[i].color for i in range(len(list_of_tiles)-1))
+    # Checking if it is a run even/odd
+    if 3 <= len(list_of_tiles) <= 5:
+        all_odd_or_even = all(t.value % 2 == 0 for t in list_of_tiles) or all(t.value % 2 != 0 for t in list_of_tiles)
+        diff_2 = all(list_of_tiles[i + 1].value - list_of_tiles[i].value == 2 for i in range(len(list_of_tiles) - 1))
+        same_color = all(list_of_tiles[i + 1].color == list_of_tiles[i].color for i in range(len(list_of_tiles) - 1))
         # Checking if the list meet all conditions to be a run
         run = all_odd_or_even and diff_2 and same_color
         if run:
@@ -185,22 +209,23 @@ def is_valid_move(current_player, list_of_tiles):
                 if valid:
                     current_player.is_greater_30 = True
                 return valid
-            else
+            else:
                 return run
-        else: # Check whether it is a group
-            same_value = all(list_of_tiles[i+1].value==list_of_tiles[i].value for i in range(len(list_of_tiles)-1))
-            different_color = len(set([t.color for t in list_of_tiles]))==len(list_of_tiles)
+        else:  # Check whether it is a group
+            same_value = all(
+                list_of_tiles[i + 1].value == list_of_tiles[i].value for i in range(len(list_of_tiles) - 1))
+            different_color = len(set([t.color for t in list_of_tiles])) == len(list_of_tiles)
             group = same_value and different_color
             if current_player.is_greater_30 == False:
                 valid = is_more_than_30(list_of_tiles)
                 if valid:
                     current_player.is_greater_30 = True
                 return valid
-            else
-                return group                 
+            else:
+                return group
     else:
         return False
-    
+
     # If it is the players turn for the first attempt to play, the board is valid if total value for sets or runs or both
     # only if sum is >30
     # This fucnction must be implemented jointly implemented with `is_valid_move` that is, both conditions must be met
@@ -209,8 +234,9 @@ def is_valid_move(current_player, list_of_tiles):
     # Eventually when the both `is_valid_move` and `is_more_than_30` return True, the player attribute is_greater_30 is set to True
     # The player is then allowed to play
 
+
 def is_more_than_30(list_of_tiles):
-    if sum(list_of_tiles)>30
+    if sum(list_of_tiles) > 30:
         return True
     else:
         return False
