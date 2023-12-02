@@ -18,6 +18,10 @@ class Tile:
     def __init__(self, value, color):
         self.value = value
         self.color = color
+        self.position = [None,None]
+
+    def __str__(self):
+        return f"Value: {self.value}, Color = {self.color}"
 
 # Classes
 class Pool:
@@ -91,6 +95,11 @@ class Player:
     def __init__(self, name, tiles):
         self.rack = Rack(tiles)
         self.name = name
+        self.turn = False # when 
+        self.is_greater_30 = False
+    
+    def __str__(self):
+        return f"Name: {self.name} Turn: {self.turn}"
 
     def initial_tiles(self, pool):
         return self.rack.initial_tiles(pool)
@@ -108,29 +117,57 @@ class Player:
         return self.rack.tiles
 
 
+class AIPlayer(Player): # still working on it, Praise make changes
+    def __init__(self,rack,name,turn,is_greater_30):
+        super().__init__(rack,name,turn,is_greater_30)
+    
+    def scan_board(self,game_board):
+        # gameboard is an instance of class gameboard
+        for row in game_board:
+            # get positions of the separators, for now I will use a  `space` as placeholder, rect is a rectangle that represents a tile
+            sep_position = [i for i,rect in enumerate(row) if rect is None]
+            # break the rows into sublists, which are valid sets(groups) and runs
+            sets_and_runs = [row[i:j] for i,j in zip([0]+sep_position,sep_position+None)]
+            # remove the blank spaces to remain with valid sublist of sets and runs
+            self.board_sets_and_runs = [[rect for rect in set_or_run if rect is not None] for set_or_run in sets_and_runs]
+        return self.board_sets_and_runs ## here is a list of sublists 
+    
+    def scan_rack(self): # scans the rack and play tiles
+        # check all tiles in the rack and append the tile to the end or the beginning of a set or run
+        # we need to obtain the first and last tiles in group/run from the gameboard, then comapare with what the player has
+        # This will require to break is_valid_move to identify groups and runs separately
+        for sublist in self.board_sets_and_runs:
+            if is_group(sublist):
+                # Check if there is any tile of same value with different color from what is on game board
+                # Took the first one since they are all of the same value
+                board_tile_value = sublist[0].value
+                board_tile_colors = [tile.color for tile in sublist]
+        # check if there is any tile of `value` in rack anf of different color from those on game board
+                for i,tile in enumerate(self.rack):
+                    if tile.value == board_tile_value and tile.color not in board_tile_colors:
+                        pick_tile = self.rack.pop(i)
+                    sublist.append(pick_tile)
+        # Checking runs and appending
+            if is_run(sublist):
+                board_tile_values = [tile.value for tile in sublist]
+                board_tile_color = sublist[0].color
+                # checking at the beginning and end of runs, play as        
+                for i,tile in enumerate(self.rack):
+                    if tile.color == board_tile_color:
+                        if tile.value+2 == board_tile_values[0]:
+                            pick_tile = self.rack.pop(i)
+                            sublist.insert(0,pick_tile)
+                        if tile.value-2 == board_tile_values[-1]:
+                            pick_tile = self.rack.pop(i)
+                            sublist.append(pick_tile)
+                         # This will need to be drawn on screen 
+            else:
+                self.pick_tiles()
+                # the player turn ends
+                # One added to rack other returned
+
+
 # bukayo = Player('Bukayo Saka')
-##  This needs a game board
-class ValidMoves:
-    def __init__(self, board):
-        self.board = board
-
-    # validate player moves
-    def is_run(self):
-        if 3 <= len(self.player.run) <= 5:
-            if all(j.value % 2 == 0 for _, j in enumerate(self.player.run)):
-                if all(self.player.run[i + 1].value - self.player.run[i].value == 2 for i, _ in
-                       enumerate(self.player.run[:-1])):
-                    return True
-                else:
-                    return False
-
-    def is_group(self):
-        if 3 <= len(self.player.run) <= 5:
-            if all(i == j for i, j in zip(self.player.run, self.player.run)):
-                if all(self.player.run[i + 1].color != self.player.run[i] for i, j in enumerate(self.player.run[:-1])):
-                    pass
-                ## to be completed
-
 
 class GameBoard:
     # rect (left/x, top/y, width, height)
@@ -195,48 +232,38 @@ class GameBoard:
         return copy.deepcopy(self.board)
 
 
-def is_valid_move(current_player, list_of_tiles):
-    # Checking if it is a run even/odd
-    if 3 <= len(list_of_tiles) <= 5:
-        all_odd_or_even = all(t.value % 2 == 0 for t in list_of_tiles) or all(t.value % 2 != 0 for t in list_of_tiles)
-        diff_2 = all(list_of_tiles[i + 1].value - list_of_tiles[i].value == 2 for i in range(len(list_of_tiles) - 1))
-        same_color = all(list_of_tiles[i + 1].color == list_of_tiles[i].color for i in range(len(list_of_tiles) - 1))
+def is_run(list_of_tiles):
+        # Checking if it is a run even/odd
+    if 3<=len(list_of_tiles)<=8:
+        all_odd_or_even = all(t.value % 2==0 for t in list_of_tiles) or all(t.value % 2!=0 for t in list_of_tiles) 
+        diff_2 = all(list_of_tiles[i+1].value-list_of_tiles[i].value==2 for i in range(len(list_of_tiles)-1))
+        same_color = all(list_of_tiles[i+1].color==list_of_tiles[i].color for i in range(len(list_of_tiles)-1))
         # Checking if the list meet all conditions to be a run
         run = all_odd_or_even and diff_2 and same_color
-        if run:
-            if current_player.is_greater_30 == False:
-                valid = is_more_than_30(list_of_tiles)
-                if valid:
-                    current_player.is_greater_30 = True
-                return valid
-            else:
-                return run
-        else:  # Check whether it is a group
-            same_value = all(
-                list_of_tiles[i + 1].value == list_of_tiles[i].value for i in range(len(list_of_tiles) - 1))
-            different_color = len(set([t.color for t in list_of_tiles])) == len(list_of_tiles)
-            group = same_value and different_color
-            if current_player.is_greater_30 == False:
-                valid = is_more_than_30(list_of_tiles)
-                if valid:
-                    current_player.is_greater_30 = True
-                return valid
-            else:
-                return group
+        return run
     else:
         return False
-
-    # If it is the players turn for the first attempt to play, the board is valid if total value for sets or runs or both
-    # only if sum is >30
-    # This fucnction must be implemented jointly implemented with `is_valid_move` that is, both conditions must be met
-    # for a player to countinue playing, if not the player has to draw card from the pool
-    # This is a simple function that returns a bool `True` if greater than thirty
-    # Eventually when the both `is_valid_move` and `is_more_than_30` return True, the player attribute is_greater_30 is set to True
-    # The player is then allowed to play
-
-
-def is_more_than_30(list_of_tiles):
-    if sum(list_of_tiles) > 30:
+    
+def is_group(list_of_tiles):
+    if 3<=len(list_of_tiles)<=5:
+        same_value = all(list_of_tiles[i+1].value==list_of_tiles[i].value for i in range(len(list_of_tiles)-1))
+        different_color = len(set([t.color for t in list_of_tiles]))==len(list_of_tiles)
+        group = same_value and different_color
+        return group                 
+    else:
+        return False
+    
+def is_more_than_30(list_of_tiles): # once one player has more than 30 and continues playing how will this work
+    if sum([tile.value for tile in list_of_tiles])>30:
         return True
     else:
         return False
+
+def is_valid_move(list_of_tiles,player):
+    if player.greater_30 == False:
+        return is_more_than_30(list_of_tiles)
+    else:
+        return is_group(list_of_tiles) or is_run(list_of_tiles)
+
+
+
