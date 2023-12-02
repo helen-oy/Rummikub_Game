@@ -322,3 +322,5 @@ def change_turns(list_of_players, Current_Player,Next_Player):
 		Next_Player = list_of_players[new_index] # update the next player
 	return Current_Player, Next_Player # return the current and next player so that their values can be set outside the function
 
+def is_empty(game_board):
+    return all(all(x == game_board[0][0] for x in row) for row in game_board) # if every element in a row is same as the first element and every row is the same as the first row
