@@ -121,6 +121,14 @@ class AIPlayer(Player): # still working on it, Praise make changes
     def __init__(self,rack,name,turn,is_greater_30):
         super().__init__(rack,name,turn,is_greater_30)
 
+    # the get_rack_moves function is not called directly. Instead the make_moves_rack functon should be called.
+    # the make_moves_rack function calls get_rack_moves to get the sets and runs the player can play. 
+    # once it knows what the player can play, it scans the board to determine where they can play it.
+    # it returns two lists. [[current tile positions in the rack], [new tile positions on the board]]
+    # Esentially it returns where the tiles are and where they should be. The first tile position corresponds with the first board position, the second tile position with the second board position and so on. Output format can be changed as needed.
+    # To avoid placing tiles from the rack beside tiles on the board (as this function is not trying to extend existing sets but play new ones), the function looks for a little more space than necessary.
+    # This function assumes that tiles have a position attribute which is updated as they move around. It uses this attribute to return current tile position in the rack.
+
     def get_rack_moves(self, which_player): # this function takes in the player the AI should make moves for (on the computers turn, it will take in computer. When player clicks "Play for me" it will take in player).
         from itertools import permutations # so we can easily generate arrangements of tiles in the rack and find possible moves
     
@@ -157,6 +165,60 @@ class AIPlayer(Player): # still working on it, Praise make changes
         find_highest_move(rack, depth) # Start the recursion herre
 
         return moves_to_play # return the list of all moves to play.
+    
+    def make_moves_rack(self, which_player, game_board): # this function returns where the tiles we want to play are in the rack, and where we want to place them on the board.
+        moves_to_play = self.get_rack_moves(which_player) # get all the groups and runs that can be formed from the tiles in player rack
+        needed_spaces = [(len(move) + 2) for move in moves_to_play] # get the space we need to play our moves. plus 2 to allow space between moves already on the gameboard
+
+        position_in_rack = [] # list to store the positions of the tiles in the rack
+        position_in_board = [] # list to store the where we want to place our tiles on the board.
+
+        if is_empty(game_board): # if the gameboard is empty, we can place tiles anywhere.
+            i, j = 0, 0
+            for move in moves_to_play:
+                for tile in move:
+                    position_in_rack.append(tile.position)
+                    position_in_board.append([i,j])
+                    j += 1
+                i += 1
+        
+        for row_index, each_row in enumerate(game_board): # outer loop, checks each row and saves the row index
+            empty_spaces = [] # store the positions of our empty spaces
+            for column_index, element in enumerate(each_row): # checks each element in that row and saves the column index
+                if element == None: # if the element is an empty space
+                    empty_spaces.append([row_index, column_index]) # add its position to our list of empty spaces 
+
+                if element != None or (len(empty_spaces) in needed_spaces): # if we run into a tile object or we have as much empty spaces as needed to play our move
+                    if empty_spaces: # if we have a bunch of empty spaces by the time we run into a tile (check for the tile half of the previous condition)
+                        for move in moves_to_play: # go through our list of moves. 
+                            if len(move) == len(empty_spaces) - 2: # if we find a move that we have enough space for.
+                                needed_spaces.remove(len(empty_spaces)) # remove that space from our list of empty spaces so we know it has been used up on the next iteration
+                                for tile in move:
+                                    position_in_rack.append([tile.position]) # add the position in rack to our list
+                                for i in range(1, len(empty_spaces) - 1):
+                                    position_in_board.append(empty_spaces[i]) # add the position of the empty spaces in our list, starting from 1 for extra spacing between tiles on the board.
+
+                                empty_spaces = [] # reset our list of empty spaces
+                                moves_to_play.remove(move) # remove the move from ourlist of moves so that we know it has been handled on the next iteration
+
+                                break # break out of the loop since the move has been addressed and we are looking for space all over again. Also we are not iterating over moves_to_play as we are modifying it
+                    empty_spaces = [] # if the empty_spaces we found so far (by the time we ran into a tile) isn't long enough for any of our moves, reset it as well.
+                
+            if empty_spaces: # if we have a bunch of empty spaces by the time we reach the end of our row (this might be redundant, I'm not sure)
+                for move in moves_to_play:
+                    if len(move) == len(empty_spaces) - 2:
+                        needed_spaces.remove(len(empty_spaces))
+                        for tile in move:
+                            position_in_rack.append([tile.position])
+                        for i in range(1, len(empty_spaces) - 1):
+                            position_in_board.append(empty_spaces[i])
+
+                            empty_spaces = []
+                            moves_to_play.remove(move)
+
+                            break
+            empty_spaces = []
+        return [position_in_rack, position_in_board]
     
     def format_board(self,game_board): ## Depends on format of data received from gameplay
         # This is intended to format the gameboar and make is usable for AI player
