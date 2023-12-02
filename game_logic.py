@@ -262,7 +262,7 @@ def is_more_than_30(list_of_tiles): # once one player has more than 30 and conti
         return False
 
 def is_valid_move(list_of_tiles,player):
-    if player.greater_30 == False:
+    if player.is_greater_30 == False:
         passed = is_more_than_30(list_of_tiles)
         if passed:
             player.is_greater_30 = True
