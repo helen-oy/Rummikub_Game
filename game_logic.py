@@ -181,38 +181,40 @@ class GameBoard:
 
     def validate_board(self, game_board, current_player):
         # game_board is the current state of the gameboard - a 9 by 20 matrix of tile objects passed in from frontend.
-        # current_player is the player whose turn it is. we need to check if they have played at least 30 points on their first move
+        # current_player is the player whose turn it is. 
+        # we need to check if they have played at least 30 points on their first move
+        # we also need to set their turn to false once they play a valid move.
 
         # this function returns a list [boolean, list]
         # the boolean let's us know if the board is valid or not
         # the list contains each position of the tiles on the board that form invalid game play.
 
-        invalid_positions = []
-        status = True
-        tile_pos = {}
-        i, j = 0, 0
+        invalid_positions = [] # list of invalid positions
+        status = True # represents the status of the gameboard. We initialise it to true but set it to false once gameboard is found to be invalid.
+        tile_pos = {} # a dictionary to help us link each tile to its position of the board so we can return those positions later
+        i, j = 0, 0 # i, j represent coordinates on the board. they are updated as we loop through the board and used to determine tile positions on the board.
 
-        for each_row in game_board:  # outer loop, checks each row
-            set = []  # store our runs and groups
-            for element in each_row:  # checks each space/element in that row
-                if element != None:
+        for each_row in game_board:  # outer loop, checks each row in the game board. Increment i at the end of this loop.
+            set = []  # create an empty list to store groups and runs we find on the board (using None - empty space - as delimiter)
+            for element in each_row:  # inner loop, checks each space/element in that row. Increment j at the end of this loop.
+                if element != None: # If the element is not an empty space (so if it is a tile object)
                     set.append(element)  # add that tile to our set
-                    tile_pos[element] = str(i) + "," + str(j)
+                    tile_pos[element] = str(i) + "," + str(j) # store the tile's position on the board in a dictionary using the tile as key and it's position as value.
 
                 if element == None:  # if the current element in the row is an empty space
-                    if set:  # if set is not empty by the time we run into an empty space
-                        is_valid = is_valid_move(current_player, set)  # check if it is a valid group or run
+                    if set:  # check if set is not empty by the time we run into an empty space. If it isn't then we have a set we need to validate.
+                        is_valid = is_valid_move(set, current_player)  # check if the set is a valid group or run
                         if is_valid == False:  # if the move is not valid, add the positions of all invalid tiles to invalid positions
-                            status = False
+                            status = False # set the status of our gameboard to false.
                             for tile in set:
                                 invalid_positions.append(tile_pos[tile])
                             set = []  # clear set for the next sets.
                         else:
-                            set = []  # if the move was valid, set only clear set.
+                            set = []  # if the move was valid, only clear set.
                 j += 1  # update the column position as we move through the row.
 
             if set:  # if the set is not empty after we reach the end of the row
-                is_valid = is_valid_move(current_player, set)  # check if it is a valid group or run
+                is_valid = is_valid_move(set, current_player)  # check if it is a valid group or run
                 if is_valid == False:  # if the move is not valid, add the positions of all invalid tiles to invalid positions
                     status = False
                     for tile in set:
@@ -222,10 +224,11 @@ class GameBoard:
                     set = []  # if the move was valid, set should be reset
             i += 1  # update the row position as we move through the board
 
-        if status:  # if thr board is valid, update the gameboard
+        if status:  # if status is true after we have looped through the board, then the board is valid. So we update the gameboard and end the player's turn
             self.board = copy.deepcopy(game_board)
+            current_player.turn = False
 
-        return [status, invalid_positions]
+        return [status, invalid_positions] # return the board status and invalid positions. this will be [True, []] when board is valid.
 
     def get_copy(self):
         return copy.deepcopy(self.board)
