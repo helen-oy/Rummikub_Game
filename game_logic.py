@@ -170,19 +170,18 @@ class AIPlayer(Player): # still working on it, Praise make changes
 # bukayo = Player('Bukayo Saka')
 
 class GameBoard:
-    # rect (left/x, top/y, width, height)
     def __init__(self):
         self.board = []  # initialise the game board as an empty list.
         self.rows, self.columns = 9, 20
         for i in range(self.rows):
             new_row = []
-            for j in range(self.columns):
+            for j in range(self.columns): # each row is full of Nones to denote empty spaces
                 new_row.append(None)
             self.board.append(new_row)
 
     def validate_board(self, game_board, current_player):
         # game_board is the current state of the gameboard - a 9 by 20 matrix of tile objects passed in from frontend.
-        # current_player is the player whose turn it is. we need to check if they have played 30 points or not
+        # current_player is the player whose turn it is. we need to check if they have played at least 30 points on their first move
 
         # this function returns a list [boolean, list]
         # the boolean let's us know if the board is valid or not
@@ -263,6 +262,7 @@ def is_valid_move(list_of_tiles,player):
     if player.greater_30 == False:
         passed = is_more_than_30(list_of_tiles)
         if passed:
+            player.is_greater_30 = True
             return is_group(list_of_tiles) or is_run(list_of_tiles)
         else:
             return passed
