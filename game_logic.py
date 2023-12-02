@@ -120,6 +120,45 @@ class Player:
 class AIPlayer(Player): # still working on it, Praise make changes
     def __init__(self,rack,name,turn,is_greater_30):
         super().__init__(rack,name,turn,is_greater_30)
+
+    def get_rack_moves(self, which_player): # this function takes in the player the AI should make moves for.
+        from itertools import permutations
+    
+        min_size = 3
+        max_size = 8
+        depth = 5
+
+        rack = copy.deepcopy(which_player.rack.tiles)  # Deep copy to avoid modifying the original rack
+        moves_to_play = [] #list of moves to play on the board
+
+        def find_highest_move(rack, depth): # we will generate all possible moves, find the valid ones, and find the highest scoring valid move
+
+            combos = []
+            valid_combos = []
+
+            for combo_size in range(min_size, max_size + 1):
+                permutations_of_combo_size = [list(permutation) for permutation in permutations(rack, combo_size)] # combinations makes combinations of iterables without repeating elements. returns a tuple but I convert to list
+                combos.extend(permutations_of_combo_size) # add each move set individually from the list of possible moves of each acceptable size
+
+            for possible_move in combos: # filter out the valid moves
+                if is_valid_move(possible_move, which_player): # for each possible move, check if it is valid
+                    valid_combos.append(possible_move) # add it to our list of valid combos
+
+            if not valid_combos or depth == 0:
+                return  # If there are no more valid moves, end recursion
+
+            highest_combo = max(valid_combos, key=lambda combo: sum(tile.value for tile in combo)) # from the list of valid combos, return the one with the highest sum of tile values
+            moves_to_play.append(highest_combo)
+
+            # Remove tiles that make up the highest move from the rack so that rack is different on next iteration
+            new_rack = [tile for tile in rack if tile not in highest_combo]
+
+            # Call the function within itself but with the updated rack
+            find_highest_move(new_rack, depth - 1) # deep copy so its unique
+
+        find_highest_move(rack, depth) # Start the recursion herre
+
+        return moves_to_play # return the list of all moves to play.
     
     def scan_board(self,game_board):
         # gameboard is an instance of class gameboard
