@@ -265,5 +265,16 @@ def is_valid_move(list_of_tiles,player):
     else:
         return is_group(list_of_tiles) or is_run(list_of_tiles)
 
-
+# list_of_players contains all the players in the game in order of their decided turns
+def change_turns(list_of_players, Current_Player,Next_Player): 
+	if Current_Player.turn == False: # If it is no longer the current player's turn
+		index = list_of_players.index(Current_Player) # get the position of the current player in list of players
+		Next_Player.turn = True # set the next player's turn to true
+		Current_Player = Next_Player # update the current player
+		if index < len(list_of_players) - 1: # as long as we have not reached the end of our list of players
+			new_index = list_of_players.index(Current_Player) + 1 # the next player is the player beside our updated current player
+		else:
+			new_index = 0 # else if we have reached the end of the list, cycle back to the first player
+		Next_Player = list_of_players[new_index] # update the next player
+	return Current_Player, Next_Player # return the current and next player so that their values can be set outside the function
 
