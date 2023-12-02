@@ -158,50 +158,72 @@ class AIPlayer(Player): # still working on it, Praise make changes
 
         return moves_to_play # return the list of all moves to play.
     
-    def scan_board(self,game_board):
+    def format_board(self,game_board): ## Depends on format of data received from gameplay
+        # This is intended to format the gameboar and make is usable for AI player
         # gameboard is an instance of class gameboard
         for row in game_board:
+            for i in row:
+                if i is None:
+                    i = "_"
             # get positions of the separators, for now I will use a  `space` as placeholder, rect is a rectangle that represents a tile
-            sep_position = [i for i,rect in enumerate(row) if rect is None]
+            sep_position = [i for i,rect in enumerate(row) if rect == "_"]
             # break the rows into sublists, which are valid sets(groups) and runs
             sets_and_runs = [row[i:j] for i,j in zip([0]+sep_position,sep_position+None)]
             # remove the blank spaces to remain with valid sublist of sets and runs
-            self.board_sets_and_runs = [[rect for rect in set_or_run if rect is not None] for set_or_run in sets_and_runs]
+            self.board_sets_and_runs = [[rect for rect in set_or_run if rect == '_'] for set_or_run in sets_and_runs]
         return self.board_sets_and_runs ## here is a list of sublists 
     
-    def scan_rack(self): # scans the rack and play tiles
-        # check all tiles in the rack and append the tile to the end or the beginning of a set or run
-        # we need to obtain the first and last tiles in group/run from the gameboard, then comapare with what the player has
-        # This will require to break is_valid_move to identify groups and runs separately
-        for sublist in self.board_sets_and_runs:
-            if is_group(sublist):
-                # Check if there is any tile of same value with different color from what is on game board
-                # Took the first one since they are all of the same value
-                board_tile_value = sublist[0].value
-                board_tile_colors = [tile.color for tile in sublist]
-        # check if there is any tile of `value` in rack anf of different color from those on game board
-                for i,tile in enumerate(self.rack):
-                    if tile.value == board_tile_value and tile.color not in board_tile_colors:
-                        pick_tile = self.rack.pop(i)
-                    sublist.append(pick_tile)
-        # Checking runs and appending
+    def scan_board_runs(self,game_board):
+        # Game board is taken as a list of lists where sublists are runs or sets
+        runs_board = []
+        for i, sublist in enumerate(game_board):
             if is_run(sublist):
-                board_tile_values = [tile.value for tile in sublist]
-                board_tile_color = sublist[0].color
-                # checking at the beginning and end of runs, play as        
-                for i,tile in enumerate(self.rack):
-                    if tile.color == board_tile_color:
-                        if tile.value+2 == board_tile_values[0]:
-                            pick_tile = self.rack.pop(i)
-                            sublist.insert(0,pick_tile)
-                        if tile.value-2 == board_tile_values[-1]:
-                            pick_tile = self.rack.pop(i)
-                            sublist.append(pick_tile)
-                         # This will need to be drawn on screen 
-            else:
-                self.pick_tiles()
-                # the player turn ends
-                # One added to rack other returned
+                runs_board.append(sublist)
+
+        # get colors of runs
+        colors = []
+        for i, sublist in enumerate(runs_board):
+            for t in sublist:
+                colors.append(t.color)
+        colors = list(set(colors))
+        
+        for rack_tile in self.rack.tiles:
+            if rack_tile.color in colors:
+                for i,board_run in enumerate(runs_board):
+                    if rack_tile.value-board_run[0].value==-2 and rack_tile.color==board_run[0].color:
+                        play_tile = self.rack.tiles.pop(i)
+                        board_run.insert(0,play_tile)
+                    elif rack_tile.value-board_run[-1].value==2 and rack_tile.color==board_run[-1].color:
+                        play_tile = self.rack.tiles.pop(i)
+                        board_run.insert(len(board_run),play_tile)
+                    else:
+                        return False
+        return runs_board
+
+    def scan_board_groups(self,game_board): # scans the rack and play tiles
+        groups_board = []
+        for sublist in game_board:
+            if is_group(sublist):
+                groups_board.append(sublist)
+
+            # get values contained in groups_board:
+        values = []
+        colors = []
+        for i, sublist in enumerate(groups_board):
+            for t in sublist:
+                values.append(t.value)
+                colors.append(t.color)
+
+        for t in self.rack.tiles:
+            if t.value in values:
+                for i, sublist in groups_board:
+                    if t.value==sublist[0].value and t.color not in [c.color for c in sublist]:
+                        play_tile = self.rack.tiles.pop(i)
+                        sublist.append(play_tile)
+                    else:
+                        return False
+        return groups_board
+                    
 
 
 # bukayo = Player('Bukayo Saka')
