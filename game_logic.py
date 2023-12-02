@@ -254,14 +254,18 @@ def is_group(list_of_tiles):
         return False
     
 def is_more_than_30(list_of_tiles): # once one player has more than 30 and continues playing how will this work
-    if sum([tile.value for tile in list_of_tiles])>30:
+    if sum([tile.value for tile in list_of_tiles])>=30:
         return True
     else:
         return False
 
 def is_valid_move(list_of_tiles,player):
     if player.greater_30 == False:
-        return is_more_than_30(list_of_tiles)
+        passed = is_more_than_30(list_of_tiles)
+        if passed:
+            return is_group(list_of_tiles) or is_run(list_of_tiles)
+        else:
+            return passed
     else:
         return is_group(list_of_tiles) or is_run(list_of_tiles)
 
