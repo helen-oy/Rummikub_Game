@@ -127,7 +127,7 @@ class AIPlayer(Player): # still working on it, Praise make changes
     # it returns two lists. [[current tile positions in the rack], [new tile positions on the board]]
     # Esentially it returns where the tiles are and where they should be. The first tile position corresponds with the first board position, the second tile position with the second board position and so on. Output format can be changed as needed.
     # To avoid placing tiles from the rack beside tiles on the board (as this function is not trying to extend existing sets but play new ones), the function looks for a little more space than necessary.
-    # This function assumes that tiles have a position attribute which is updated as they move around. It uses this attribute to return current tile position in the rack.
+    # This function assumes that tiles have a position attribute which is updated as they move around (more importantly, anytime they return to the rack). It uses this attribute to return current tile position in the rack.
 
     def get_rack_moves(self, which_player): # this function takes in the player the AI should make moves for (on the computers turn, it will take in computer. When player clicks "Play for me" it will take in player).
         from itertools import permutations # so we can easily generate arrangements of tiles in the rack and find possible moves
@@ -177,7 +177,7 @@ class AIPlayer(Player): # still working on it, Praise make changes
             i, j = 0, 0
             for move in moves_to_play:
                 for tile in move:
-                    position_in_rack.append(tile.position)
+                    position_in_rack.append(tile.position[1])
                     position_in_board.append([i,j])
                     j += 1
                 i += 1
@@ -194,7 +194,7 @@ class AIPlayer(Player): # still working on it, Praise make changes
                             if len(move) == len(empty_spaces) - 2: # if we find a move that we have enough space for.
                                 needed_spaces.remove(len(empty_spaces)) # remove that space from our list of empty spaces so we know it has been used up on the next iteration
                                 for tile in move:
-                                    position_in_rack.append([tile.position]) # add the position in rack to our list
+                                    position_in_rack.append([tile.position[1]]) # add the position in rack to our list
                                 for i in range(1, len(empty_spaces) - 1):
                                     position_in_board.append(empty_spaces[i]) # add the position of the empty spaces in our list, starting from 1 for extra spacing between tiles on the board.
 
@@ -209,7 +209,7 @@ class AIPlayer(Player): # still working on it, Praise make changes
                     if len(move) == len(empty_spaces) - 2:
                         needed_spaces.remove(len(empty_spaces))
                         for tile in move:
-                            position_in_rack.append([tile.position])
+                            position_in_rack.append([tile.position[1]])
                         for i in range(1, len(empty_spaces) - 1):
                             position_in_board.append(empty_spaces[i])
 
