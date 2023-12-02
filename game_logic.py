@@ -133,7 +133,7 @@ class AIPlayer(Player): # still working on it, Praise make changes
         from itertools import permutations # so we can easily generate arrangements of tiles in the rack and find possible moves
     
         min_size = 3 # the minimum size of a possible move. 
-        max_size = 8 # the maximum size of a possible move.
+        max_size = 5 # the maximum size of a possible move.
         depth = 5 # how far the computer should go in its quest to find valid possible moves. At a depth of 5, the computer (if that many exist) would find the 5 highest scoring moves. 
 
         rack = copy.deepcopy(which_player.rack.tiles)  # Deep copy to avoid modifying the original rack. The computer removes tiles from this rack to know what the next highest scoring move will be after it has played the first.
