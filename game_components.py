@@ -27,6 +27,7 @@ tile_width = (playing_board_width / num_of_columns) - tile_spacing
 tile_height = (playing_board_height / num_of_rows) - tile_spacing
 screen_center_x = screen_width * 0.5
 screen_center_y = screen_height * 0.5
+show = False
 
 background = "./board.png"
 game_background = "./background.jpg"
@@ -54,10 +55,24 @@ class GameRects:
         self.game_board_tile_surfaces = []
         self.update_game_state_tiles_surfaces()
 
-        #creating show button for computer
+        # Creating show button for computer
         self.show_button = GameRects.show_tile_button_surface()
 
+        # creating submit button
+        self.submit_button = GameRects.submit_button()
 
+        # Creating play for me button
+        self.play_for_me = GameRects.play_for_me()
+
+        # Creating draw tile button
+        self.draw_tiles_button = GameRects.draw_tiles_button()
+
+        # building tile drawn from pool
+
+        self.drawn_pool_tiles_surfaces = []
+
+        #Display remaining_tiles_number in pool
+        self.remaining_tile_surface = GameRects.remaining_tile_button(self.game_play.remaining_tiles_in_pool, game_font)
 
         # Game board tiles - (surface, rect)
         # self.game_board_tile_surfaces = GameRects.create_board_surfaces(self.game_board_position.x,
@@ -105,6 +120,15 @@ class GameRects:
         else:
             return False
 
+    def is_colliding_with_drawn_tile(self, pos):
+        for i,tile in enumerate(self.drawn_pool_tiles_surfaces):
+            print(tile)
+            if tile[1].collidepoint(pos):
+                return True
+
+
+
+
     def event_on_player_rack(self, pos):
         # for i, tile in enumerate(player_rack_surfaces):
         #     if tile[1].collidepoint(pos[0], pos[1]) and user_tiles[i] is not None:
@@ -115,6 +139,26 @@ class GameRects:
 
     def get_comp_tiles_in_grid(self):
         pass
+
+    def update_drawn_pool_tiles(self):
+        self.drawn_pool_tiles_surfaces = GameRects.create_tile_drawn_from_pool(self.game_play.drawn_tiles_from_pool,
+                                                                               self.game_font)
+
+    def update_remaining_tiles(self):
+        self.remaining_tile_surface = GameRects.remaining_tile_button(self.game_play.remaining_tiles_in_pool, self.game_font)
+
+
+    @classmethod
+    def create_tile_drawn_from_pool(cls, tiles, game_font):
+        surface = []
+        for i, tile in enumerate(tiles):
+            print(tile)
+            tile_surface = build_tile(tile, game_font, True)
+            tile_surface_rect = tile_surface.get_rect()
+            tile_surface_rect.topleft = (screen_width * 0.03, screen_height * 0.70 + (i * tile_height))
+            surface.append((tile_surface, tile_surface_rect))
+
+        return surface
 
     @classmethod
     def create_rack_surfaces(cls, tiles, game_font, rack_x, rack_y, show_number=True):
@@ -175,11 +219,67 @@ class GameRects:
 
     @classmethod
     def show_tile_button_surface(cls):
-        show_tile = Surface((35,35))
-        show_tile.fill((0,0,0))
+        show_tile = Surface((35, 35))
+        show_tile.fill((0, 0, 0))
+        game_font_size_8 = font.SysFont('arial', 8, bold=True)
+        text = game_font_size_8.render("Show tile", True, (255, 0, 255))
+        text_rect = text.get_rect()
+        text_rect.topleft = (0, 35 * 0.2)
         show_tile_rect = show_tile.get_rect()
         show_tile_rect.topleft = (screen_width * 0.93, screen_height * 0.07)
+        show_tile.blit(text, text_rect)
         return show_tile, show_tile_rect
+
+    @classmethod
+    def submit_button(cls):
+        submit_surface = Surface((35, 35))
+        submit_surface.fill((0, 0, 0))
+        submit_button_rect = submit_surface.get_rect()
+        submit_button_rect.topleft = (screen_width * 0.93, screen_height * 0.92)
+        game_font_size_10 = font.SysFont('arial', 10, bold=True)
+        text = game_font_size_10.render("submit", True, (255, 0, 255))
+        text_rect = text.get_rect()
+        text_rect.topleft = (0, 35 * 0.2)
+        submit_surface.blit(text, text_rect)
+
+        return submit_surface, submit_button_rect
+
+    @classmethod
+    def play_for_me(cls):
+        play_me_surface = Surface((35, 35))
+        play_me_surface.fill((0, 0, 0))
+        play_me_rect = play_me_surface.get_rect()
+        play_me_rect = (screen_width * 0.93, screen_height * 0.85)
+        game_font_size_10 = font.SysFont('arial', 10, bold=True)
+        text = game_font_size_10.render("Auto Play", True, (255, 0, 255))
+        text_rect = text.get_rect()
+        text_rect.topleft = (0, 35 * 0.2)
+        play_me_surface.blit(text, text_rect)
+        return play_me_surface, play_me_rect
+
+    @classmethod
+    def draw_tiles_button(cls):
+        draw_tile_surface = Surface((40, 40))
+        draw_tile_surface.fill((0, 0, 0))
+        draw_tile_surface_rect = draw_tile_surface.get_rect()
+        draw_tile_surface_rect.topleft = (screen_width * 0.03, screen_height * 0.55)
+        game_font_size_10 = font.SysFont('arial', 10, bold=True)
+        text = game_font_size_10.render("Draw Tile", True, (255, 0, 255))
+        text_rect = text.get_rect()
+        text_rect.topleft = (0, 35 * 0.2)
+        draw_tile_surface.blit(text, text_rect)
+        return draw_tile_surface, draw_tile_surface_rect
+
+    @classmethod
+    def remaining_tile_button(cls, remaining_tile, font):
+        img = font.render(str(remaining_tile), True, (255, 255, 0))
+        img_rect = img.get_rect()
+        img_rect.center = ((screen_width - playing_board_width) / 4, screen_height / 2)
+        return img, img_rect
+
+
+
+
 
 
 

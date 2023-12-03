@@ -2,7 +2,7 @@ import random
 import copy
 
 # Constants
-WIDTH, HEIGHT = 800, 600
+
 FPS = 60
 BLUE = (0, 0, 180)
 RED = (180, 0, 0)
@@ -12,7 +12,7 @@ WHITE = (255, 255, 255)
 PURPLE = (128, 0, 128)
 
 
-# screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
 
 class Tile:
     def __init__(self, value, color):
@@ -49,8 +49,12 @@ class Pool:
         selected_tiles = [self.tiles.pop(random.randrange(len(self.tiles))) for _ in range(2)]
         tile1 = selected_tiles[0]
         tile2 = selected_tiles[1]
+        return tile1, tile2
 
-        return [tile1, tile2]
+
+    def update_pool(self, tile):
+        return self.tiles.append(tile)
+
 
 
 class Rack:
@@ -262,7 +266,7 @@ def is_more_than_30(list_of_tiles): # once one player has more than 30 and conti
         return False
 
 def is_valid_move(list_of_tiles,player):
-    if player.greater_30 == False:
+    if player.is_greater_30 == False:
         passed = is_more_than_30(list_of_tiles)
         if passed:
             player.is_greater_30 = True

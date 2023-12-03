@@ -18,6 +18,7 @@ screen = display.set_mode((screen_width, screen_height))
 clock = time.Clock()
 game_font = font.SysFont('arial', 30, bold=True)
 
+
 game_play = GamePlay()
 game_surfaces = GameRects(game_play, game_font)
 game_events = GameEvents(game_play, game_surfaces)
@@ -39,9 +40,6 @@ while running:
     game_background = game_surfaces.game_background_surface
     screen.blit(game_background, (0, 0))
 
-    show_button = game_surfaces.show_button
-    screen.blit(show_button[0], show_button[1])
-
     user_player = game_play.player
     computer_player = game_play.comp_player
 
@@ -56,6 +54,30 @@ while running:
     # Creating tile in racks
     comp_rack_surfaces = game_surfaces.comp_tiles_surfaces
     player_rack_surfaces = game_surfaces.player_tiles_surfaces
+
+    show_button = game_surfaces.show_button
+    screen.blit(show_button[0], (show_button[1]))
+
+    submit_button = game_surfaces.submit_button
+    screen.blit(submit_button[0], submit_button[1])
+
+    play_for_me = game_surfaces.play_for_me
+    screen.blit(play_for_me[0], play_for_me[1])
+
+    draw_tiles_button = game_surfaces.draw_tiles_button
+    screen.blit(draw_tiles_button[0], draw_tiles_button[1])
+
+    remaining_tiles_surface = game_surfaces.remaining_tile_surface
+    screen.blit(remaining_tiles_surface[0], remaining_tiles_surface[1])
+
+    draw_tile_build = game_surfaces.drawn_pool_tiles_surfaces
+    for tile in draw_tile_build:
+
+        screen.blit(tile[0], tile[1])
+
+
+
+
 
     for i in range(rack_length):
         comp_rack_tile = comp_rack_surfaces[i]
@@ -78,30 +100,13 @@ while running:
             temp_tiles.append(Tile(0, (255, 255, 255)))
     else:
         temp_tiles = computer_tiles
-    # class for player which creates 140 tile, some of them are empty, it have 14 cells
 
-    # # Creating Tiles on gameboard
-    # matrix_tile_rect = []
-    # for i in range(num_of_rows):
-    #     tile_rect = []
-    #     for j in range(num_of_columns):
-    #         if game_state[i][j] != None:
-    #             tile_surface = build_tile(game_state[i][j], game_font)
-    #             x_position = playing_board_x + 1 + (j * (tile_width + tile_spacing))
-    #             y_position = playing_board_y + 1 + (i * (tile_height + tile_spacing))
-    #             tile_rect1 = tile_surface.get_rect().move(x_position, y_position)
-    #             screen.blit(tile_surface, (x_position, y_position))
-    #             tile_rect.append(tile_rect1)
-    #         else:
-    #             tile_rect.append(None)
-    #     matrix_tile_rect.append(tile_rect)
+
+
+
 
     # Rendring remaining tile on pool circle
-    font = pygame.font.SysFont('arial', 20)
-    img = font.render(str(remaining_tiles), True, (255, 255, 0))
-    img_rect = img.get_rect()
-    img_rect.center = ((screen_width - playing_board_width) / 4, screen_height / 2)
-    screen.blit(img, img_rect)
+
 
     for e in event.get():
         if e.type == QUIT:
@@ -113,8 +118,6 @@ while running:
             game_events.handle_events(pos)
 
     # show pick tile
-    for i in range(2):
-        tile_surface = build_tile(pick_tile[i], game_font)
-        screen.blit(tile_surface, (pool_surface.x + 5, (i * tile_height) + pool_surface.y + 63))
+
 
     display.update()
