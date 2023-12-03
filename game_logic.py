@@ -124,51 +124,172 @@ class Player:
 class AIPlayer(Player): # still working on it, Praise make changes
     def __init__(self,rack,name,turn,is_greater_30):
         super().__init__(rack,name,turn,is_greater_30)
+
+    # the get_rack_moves function is not called directly. Instead the make_moves_rack functon should be called.
+    # the make_moves_rack function calls get_rack_moves to get the sets and runs the player can play. 
+    # once it knows what the player can play, it scans the board to determine where they can play it.
+    # it returns two lists. [[current tile positions in the rack], [new tile positions on the board]]
+    # Esentially it returns where the tiles are and where they should be. The first tile position corresponds with the first board position, the second tile position with the second board position and so on. Output format can be changed as needed.
+    # To avoid placing tiles from the rack beside tiles on the board (as this function is not trying to extend existing sets but play new ones), the function looks for a little more space than necessary.
+    # This function assumes that tiles have a position attribute which is updated as they move around (more importantly, anytime they return to the rack). It uses this attribute to return current tile position in the rack.
+
+    def get_rack_moves(self, which_player): # this function takes in the player the AI should make moves for (on the computers turn, it will take in computer. When player clicks "Play for me" it will take in player).
+        from itertools import permutations # so we can easily generate arrangements of tiles in the rack and find possible moves
     
-    def scan_board(self,game_board):
+        min_size = 3 # the minimum size of a possible move. 
+        max_size = 5 # the maximum size of a possible move.
+        depth = 5 # how far the computer should go in its quest to find valid possible moves. At a depth of 5, the computer (if that many exist) would find the 5 highest scoring moves. 
+
+        rack = copy.deepcopy(which_player.rack.tiles)  # Deep copy to avoid modifying the original rack. The computer removes tiles from this rack to know what the next highest scoring move will be after it has played the first.
+        moves_to_play = [] # a list of moves to play on the board. Computer returns this list when it is done searching.
+
+        def find_highest_move(rack, depth): # we will generate all possible moves (not the most optimal approach), find the valid ones, and find the highest scoring valid move
+
+            combos = [] # list to store all possible arrangements of tiles in the rack
+            valid_combos = [] # list to store the combinations that are valid
+
+            for combo_size in range(min_size, max_size + 1): # a combo should be between 3 and 8
+                permutations_of_combo_size = [list(permutation) for permutation in permutations(rack, combo_size)] # a list of all possible arrangements of tiles within the currently specified combo_size
+                combos.extend(permutations_of_combo_size) # add each move set individually from the list of possible moves
+
+            for possible_move in combos: # filter out the valid moves
+                if is_valid_move(possible_move, which_player): # for each possible move, check if it is valid
+                    valid_combos.append(possible_move) # add it to our list of valid combos
+
+            if not valid_combos or depth == 0:
+                return  # If there are no more valid movesvor we have reached our specified depth, end recursion
+
+            highest_combo = max(valid_combos, key=lambda combo: sum(tile.value for tile in combo)) # from the list of valid combos, return the one with the highest sum of tile values
+            moves_to_play.append(highest_combo) # add the highest combo as the first move in moves to play.
+
+            new_rack = [tile for tile in rack if tile not in highest_combo] # Remove tiles that make up the highest move from the rack so that rack is different on next iteration
+
+            find_highest_move(new_rack, depth - 1) # Call the function within itself but with the updated rack
+
+        find_highest_move(rack, depth) # Start the recursion herre
+
+        return moves_to_play # return the list of all moves to play.
+    
+    def make_moves_rack(self, which_player, game_board): # this function returns where the tiles we want to play are in the rack, and where we want to place them on the board.
+        moves_to_play = self.get_rack_moves(which_player) # get all the groups and runs that can be formed from the tiles in player rack
+        needed_spaces = [(len(move) + 2) for move in moves_to_play] # get the space we need to play our moves. plus 2 to allow space between moves already on the gameboard
+
+        position_in_rack = [] # list to store the positions of the tiles in the rack
+        position_in_board = [] # list to store the where we want to place our tiles on the board.
+
+        if is_empty(game_board): # if the gameboard is empty, we can place tiles anywhere.
+            i, j = 0, 0
+            for move in moves_to_play:
+                for tile in move:
+                    position_in_rack.append(tile.position[1])
+                    position_in_board.append([i,j])
+                    j += 1
+                i += 1
+        
+        for row_index, each_row in enumerate(game_board): # outer loop, checks each row and saves the row index
+            empty_spaces = [] # store the positions of our empty spaces
+            for column_index, element in enumerate(each_row): # checks each element in that row and saves the column index
+                if element == None: # if the element is an empty space
+                    empty_spaces.append([row_index, column_index]) # add its position to our list of empty spaces 
+
+                if element != None or (len(empty_spaces) in needed_spaces): # if we run into a tile object or we have as much empty spaces as needed to play our move
+                    if empty_spaces: # if we have a bunch of empty spaces by the time we run into a tile (check for the tile half of the previous condition)
+                        for move in moves_to_play: # go through our list of moves. 
+                            if len(move) == len(empty_spaces) - 2: # if we find a move that we have enough space for.
+                                needed_spaces.remove(len(empty_spaces)) # remove that space from our list of empty spaces so we know it has been used up on the next iteration
+                                for tile in move:
+                                    position_in_rack.append([tile.position[1]]) # add the position in rack to our list
+                                for i in range(1, len(empty_spaces) - 1):
+                                    position_in_board.append(empty_spaces[i]) # add the position of the empty spaces in our list, starting from 1 for extra spacing between tiles on the board.
+
+                                empty_spaces = [] # reset our list of empty spaces
+                                moves_to_play.remove(move) # remove the move from ourlist of moves so that we know it has been handled on the next iteration
+
+                                break # break out of the loop since the move has been addressed and we are looking for space all over again. Also we are not iterating over moves_to_play as we are modifying it
+                    empty_spaces = [] # if the empty_spaces we found so far (by the time we ran into a tile) isn't long enough for any of our moves, reset it as well.
+                
+            if empty_spaces: # if we have a bunch of empty spaces by the time we reach the end of our row (this might be redundant, I'm not sure)
+                for move in moves_to_play:
+                    if len(move) == len(empty_spaces) - 2:
+                        needed_spaces.remove(len(empty_spaces))
+                        for tile in move:
+                            position_in_rack.append([tile.position[1]])
+                        for i in range(1, len(empty_spaces) - 1):
+                            position_in_board.append(empty_spaces[i])
+
+                            empty_spaces = []
+                            moves_to_play.remove(move)
+
+                            break
+            empty_spaces = []
+        return [position_in_rack, position_in_board]
+    
+    def format_board(self,game_board): ## Depends on format of data received from gameplay
+        # This is intended to format the gameboar and make is usable for AI player
         # gameboard is an instance of class gameboard
         for row in game_board:
+            for i in row:
+                if i is None:
+                    i = "_"
             # get positions of the separators, for now I will use a  `space` as placeholder, rect is a rectangle that represents a tile
-            sep_position = [i for i,rect in enumerate(row) if rect is None]
+            sep_position = [i for i,rect in enumerate(row) if rect == "_"]
             # break the rows into sublists, which are valid sets(groups) and runs
             sets_and_runs = [row[i:j] for i,j in zip([0]+sep_position,sep_position+None)]
             # remove the blank spaces to remain with valid sublist of sets and runs
-            self.board_sets_and_runs = [[rect for rect in set_or_run if rect is not None] for set_or_run in sets_and_runs]
+            self.board_sets_and_runs = [[rect for rect in set_or_run if rect == '_'] for set_or_run in sets_and_runs]
         return self.board_sets_and_runs ## here is a list of sublists 
     
-    def scan_rack(self): # scans the rack and play tiles
-        # check all tiles in the rack and append the tile to the end or the beginning of a set or run
-        # we need to obtain the first and last tiles in group/run from the gameboard, then comapare with what the player has
-        # This will require to break is_valid_move to identify groups and runs separately
-        for sublist in self.board_sets_and_runs:
-            if is_group(sublist):
-                # Check if there is any tile of same value with different color from what is on game board
-                # Took the first one since they are all of the same value
-                board_tile_value = sublist[0].value
-                board_tile_colors = [tile.color for tile in sublist]
-        # check if there is any tile of `value` in rack anf of different color from those on game board
-                for i,tile in enumerate(self.rack):
-                    if tile.value == board_tile_value and tile.color not in board_tile_colors:
-                        pick_tile = self.rack.pop(i)
-                    sublist.append(pick_tile)
-        # Checking runs and appending
+    def scan_board_runs(self,game_board):
+        # Game board is taken as a list of lists where sublists are runs or sets
+        runs_board = []
+        for i, sublist in enumerate(game_board):
             if is_run(sublist):
-                board_tile_values = [tile.value for tile in sublist]
-                board_tile_color = sublist[0].color
-                # checking at the beginning and end of runs, play as        
-                for i,tile in enumerate(self.rack):
-                    if tile.color == board_tile_color:
-                        if tile.value+2 == board_tile_values[0]:
-                            pick_tile = self.rack.pop(i)
-                            sublist.insert(0,pick_tile)
-                        if tile.value-2 == board_tile_values[-1]:
-                            pick_tile = self.rack.pop(i)
-                            sublist.append(pick_tile)
-                         # This will need to be drawn on screen 
-            else:
-                self.pick_tiles()
-                # the player turn ends
-                # One added to rack other returned
+                runs_board.append(sublist)
+
+        # get colors of runs
+        colors = []
+        for i, sublist in enumerate(runs_board):
+            for t in sublist:
+                colors.append(t.color)
+        colors = list(set(colors))
+        
+        for rack_tile in self.rack.tiles:
+            if rack_tile.color in colors:
+                for i,board_run in enumerate(runs_board):
+                    if rack_tile.value-board_run[0].value==-2 and rack_tile.color==board_run[0].color:
+                        play_tile = self.rack.tiles.pop(i)
+                        board_run.insert(0,play_tile)
+                    elif rack_tile.value-board_run[-1].value==2 and rack_tile.color==board_run[-1].color:
+                        play_tile = self.rack.tiles.pop(i)
+                        board_run.insert(len(board_run),play_tile)
+                    else:
+                        return False
+        return runs_board
+
+    def scan_board_groups(self,game_board): # scans the rack and play tiles
+        groups_board = []
+        for sublist in game_board:
+            if is_group(sublist):
+                groups_board.append(sublist)
+
+            # get values contained in groups_board:
+        values = []
+        colors = []
+        for i, sublist in enumerate(groups_board):
+            for t in sublist:
+                values.append(t.value)
+                colors.append(t.color)
+
+        for t in self.rack.tiles:
+            if t.value in values:
+                for i, sublist in groups_board:
+                    if t.value==sublist[0].value and t.color not in [c.color for c in sublist]:
+                        play_tile = self.rack.tiles.pop(i)
+                        sublist.append(play_tile)
+                    else:
+                        return False
+        return groups_board
+                    
 
 
 # bukayo = Player('Bukayo Saka')
@@ -289,3 +410,5 @@ def change_turns(list_of_players, Current_Player,Next_Player):
 		Next_Player = list_of_players[new_index] # update the next player
 	return Current_Player, Next_Player # return the current and next player so that their values can be set outside the function
 
+def is_empty(game_board):
+    return all(all(x == game_board[0][0] for x in row) for row in game_board) # if every element in a row is same as the first element and every row is the same as the first row
