@@ -470,10 +470,11 @@ def is_empty(game_board):
 def scan_rack_group(player):
     same_tiles = []
     for i, tile in enumerate(player.rack.tiles):
-        for other_tile in player.rack.tiles:
-            if other_tile != tile and other_tile.value == tile.value:
-                same_tiles.append(tile)
-                break
+        if tile is not None:
+            for other_tile in player.rack.tiles:
+                if other_tile != tile and other_tile.value == tile.value:
+                    same_tiles.append(tile)
+                    break
     return same_tiles
 
 def scan_rack_odds(player):
