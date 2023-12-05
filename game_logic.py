@@ -37,8 +37,7 @@ class Pool:
     def remaining_tiles(self):
         return len(self.tiles)
 
-    def initial_tiles(
-            self):  # what I think is to remove rack frm here, then the rack will call this method to add tiles
+    def initial_tiles(self):  # what I think is to remove rack frm here, then the rack will call this method to add tiles
         # I see it can potentially create problems..
         # why 14 tiles not 16
         send_tiles = [self.tiles.pop(random.randrange(len(self.tiles))) for _ in range(14)]
@@ -122,8 +121,8 @@ class Player:
 
 
 class AIPlayer(Player): # still working on it, Praise make changes
-    def __init__(self,rack,name,turn,is_greater_30):
-        super().__init__(rack,name,turn,is_greater_30)
+    def __init__(self,name,tiles):
+        super().__init__(name,tiles)
 
     # the get_rack_moves function is not called directly. Instead the make_moves_rack functon should be called.
     # the make_moves_rack function calls get_rack_moves to get the sets and runs the player can play. 
@@ -185,7 +184,6 @@ class AIPlayer(Player): # still working on it, Praise make changes
                     position_in_board.append([i,j])
                     j += 1
                 i += 1
-                j = 0
         
         for row_index, each_row in enumerate(game_board): # outer loop, checks each row and saves the row index
             empty_spaces = [] # store the positions of our empty spaces
@@ -290,6 +288,15 @@ class AIPlayer(Player): # still working on it, Praise make changes
                     else:
                         return False
         return groups_board
+    ###############
+    def draw_2_tiles(self,pool):
+        t1,t2= pool.draw_2_tiles()
+        return [t1,t2]
+    
+    def return_1_tile(self,pool):
+        t1,t2= pool.draw_2_tiles()
+    
+
                     
 
 
@@ -349,7 +356,6 @@ class GameBoard:
                 else:
                     set = []  # if the move was valid, set should be reset
             i += 1  # update the row position as we move through the board
-            j = 0
 
         if status:  # if status is true after we have looped through the board, then the board is valid. So we update the gameboard and end the player's turn
             self.board = copy.deepcopy(game_board)
