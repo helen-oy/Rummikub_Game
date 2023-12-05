@@ -472,9 +472,10 @@ def scan_rack_group(player):
     for i, tile in enumerate(player.rack.tiles):
         if tile is not None:
             for other_tile in player.rack.tiles:
-                if other_tile != tile and other_tile.value == tile.value:
-                    same_tiles.append(tile)
-                    break
+                if other_tile is not None:
+                    if other_tile != tile and other_tile.value == tile.value:
+                        same_tiles.append(tile)
+                        break
     return same_tiles
 
 def scan_rack_odds(player):
