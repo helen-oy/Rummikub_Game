@@ -223,54 +223,81 @@ class AIPlayer(Player): # still working on it, Praise make changes
             empty_spaces = []
         return [position_in_rack, position_in_board]
     
-    def format_board(self,game_board): ## Depends on format of data received from gameplay
-        # This is intended to format the gameboar and make is usable for AI player
-        # gameboard is an instance of class gameboard
+    def format_board(self,game_board): 
+        board_sets_runs = []
         for row in game_board:
-            for i in row:
-                if i is None:
-                    i = "_"
-            # get positions of the separators, for now I will use a  `space` as placeholder, rect is a rectangle that represents a tile
-            sep_position = [i for i,rect in enumerate(row) if rect == "_"]
-            # break the rows into sublists, which are valid sets(groups) and runs
-            sets_and_runs = [row[i:j] for i,j in zip([0]+sep_position,sep_position+None)]
-            # remove the blank spaces to remain with valid sublist of sets and runs
-            self.board_sets_and_runs = [[rect for rect in set_or_run if rect == '_'] for set_or_run in sets_and_runs]
-        return self.board_sets_and_runs ## here is a list of sublists 
-    
-    def scan_board_runs(self,game_board):
+            temp = []
+            for item in row:
+                if item is not None:
+                    temp.append(item)
+                elif temp:
+                    board_sets_runs.append(temp)
+                    temp = []
+            if temp:
+                board_sets_runs.append(temp)
+        return board_sets_runs
+
+
+    def extend_board_runs(self,game_board):
+        board_cleaned=self.format_board(game_board)
         # Game board is taken as a list of lists where sublists are runs or sets
         runs_board = []
-        for i, sublist in enumerate(game_board):
+        for i, sublist in enumerate(board_cleaned):
             if is_run(sublist):
                 runs_board.append(sublist)
+        for i,lst in enumerate(runs_board):
+            print("old:",i)
+            for t in lst:
+                print(t)
 
-        # get colors of runs
+        # # get colors of runs
         colors = []
         for i, sublist in enumerate(runs_board):
             for t in sublist:
                 colors.append(t.color)
         colors = list(set(colors))
-        
+        # print('colors',colors)
+    
+        found_match = False  # flag to check if a match was found
         for rack_tile in self.rack.tiles:
-            if rack_tile.color in colors:
+            # print(rack_tile)
+            if rack_tile is not None and rack_tile.color in colors:
+                print('color matched')
                 for i,board_run in enumerate(runs_board):
                     if rack_tile.value-board_run[0].value==-2 and rack_tile.color==board_run[0].color:
-                        play_tile = self.rack.tiles.pop(i)
+                        print('Found LOWER',rack_tile,'in board run',i)
+                        play_tile = self.rack.tiles.pop(self.rack.tiles.index(rack_tile))
                         board_run.insert(0,play_tile)
-                    elif rack_tile.value-board_run[-1].value==2 and rack_tile.color==board_run[-1].color:
-                        play_tile = self.rack.tiles.pop(i)
-                        board_run.insert(len(board_run),play_tile)
+                        found_match = True  # set flag to True
                     else:
-                        return False
+                        print('no match [LOWER] for',rack_tile, 'in board run',i)
+                    if rack_tile.value-board_run[-1].value==2 and rack_tile.color==board_run[-1].color:
+                        print('found UPPER',rack_tile,'in board run',i)
+                        play_tile = self.rack.tiles.pop(self.rack.tiles.index(rack_tile))
+                        board_run.insert(len(board_run),play_tile)
+                        found_match = True  # set flag to True
+                    else:
+                        print('no match [UPPER] for',rack_tile,'in board run',i)
+        for i,lst in enumerate(runs_board):
+            print("new:",i)
+            for t in lst:
+                print(t)
+        if not found_match:
+            return False
         return runs_board
+        # only return False if no match was found
 
-    def scan_board_groups(self,game_board): # scans the rack and play tiles
+    def extend_board_groups(self,game_board): # scans the rack and play tiles
+        board_cleaned=self.format_board(game_board)
         groups_board = []
-        for sublist in game_board:
+        for sublist in board_cleaned:
             if is_group(sublist):
                 groups_board.append(sublist)
 
+        for i,lst in enumerate(groups_board):
+            print("old:",i)
+            for t in lst:
+                print(t)
             # get values contained in groups_board:
         values = []
         colors = []
@@ -278,15 +305,25 @@ class AIPlayer(Player): # still working on it, Praise make changes
             for t in sublist:
                 values.append(t.value)
                 colors.append(t.color)
+        print(values)
+        print(colors)
 
-        for t in self.rack.tiles:
-            if t.value in values:
-                for i, sublist in groups_board:
-                    if t.value==sublist[0].value and t.color not in [c.color for c in sublist]:
-                        play_tile = self.rack.tiles.pop(i)
+        found_match = False
+        for rack_tile in self.rack.tiles:
+            if rack_tile is not None and rack_tile.value in values:
+                print('Value matched',rack_tile)
+                for i, sublist in enumerate(groups_board):
+                    if rack_tile.value==sublist[0].value and rack_tile.color not in [c.color for c in sublist]:
+                        print('Found',rack_tile,'in group',i)
+                        play_tile = self.rack.tiles.pop(self.rack.tiles.index(rack_tile))
                         sublist.append(play_tile)
-                    else:
-                        return False
+                        found_match = True
+        if not found_match:
+            return False
+        for i,lst in enumerate(groups_board):
+            print("new:",i)
+            for t in lst:
+                print(t)
         return groups_board
     ###############
     def draw_2_tiles(self,pool):
