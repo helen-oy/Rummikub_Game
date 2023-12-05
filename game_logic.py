@@ -115,6 +115,7 @@ class Player:
 
     def add_tile(self, tile, position):
         self.rack.add_tile(tile, position)
+        tile.position[1] = position
 
     def get_tiles(self):
         return self.rack.tiles
@@ -185,6 +186,13 @@ class AIPlayer(Player): # still working on it, Praise make changes
         position_in_rack = [] # list to store the positions of the tiles in the rack
         position_in_board = [] # list to store the where we want to place our tiles on the board.
 
+        if len(moves_to_play) < 1:
+            print("No moves to play")
+        else:
+            for move in moves_to_play:
+                for tile in move:
+                    print(tile)
+
         if is_empty(game_board): # if the gameboard is empty, we can place tiles anywhere.
             i, j = 0, 0
             for move in moves_to_play:
@@ -230,6 +238,7 @@ class AIPlayer(Player): # still working on it, Praise make changes
 
                             break
             empty_spaces = []
+        print("find move says rack to board is", len(position_in_rack), len(position_in_board))
         return [position_in_rack, position_in_board]
     
     def format_board(self,game_board): 
@@ -373,6 +382,9 @@ class GameBoard:
         tile_pos = {} # a dictionary to help us link each tile to its position of the board so we can return those positions later
         i, j = 0, 0 # i, j represent coordinates on the board. they are updated as we loop through the board and used to determine tile positions on the board.
 
+        if is_empty(game_board):
+            return [False, invalid_positions]
+
         for each_row in game_board:  # outer loop, checks each row in the game board. Increment i at the end of this loop.
             set = []  # create an empty list to store groups and runs we find on the board (using None - empty space - as delimiter)
             for element in each_row:  # inner loop, checks each space/element in that row. Increment j at the end of this loop.
@@ -485,3 +497,110 @@ def scan_rack_odds(player):
 def scan_rack_evens(player):
     even_tiles = [t for t in player.rack.tiles if t is not None and t.value%2==0]
     return even_tiles
+
+# tile1 = Tile(2, BLUE)
+# tile2 = Tile(4, BLUE)
+# tile3 = Tile(6, BLUE)
+#
+# tile4 = Tile(5, RED)
+# tile5 = Tile(5, BLUE)
+# tile6 = Tile(5, BLACK)
+# tile7 = Tile(5, GREEN)
+#
+# tile11 = Tile(3, BLUE)
+# tile12 = Tile(3, RED)
+# tile13 = Tile(3, BLACK)
+#
+# tile14 = Tile(7, RED)
+# tile15 = Tile(8, BLUE)
+# tile16 = Tile(8, BLACK)
+# tile17 = Tile(7, GREEN)
+#
+# tile18 = Tile(9, RED)
+# tile20 = Tile(9, BLUE)
+# tile19 = Tile(9, GREEN)
+#
+# tile24 = Tile(11, RED)
+# tile25 = Tile(10, BLUE)
+# tile26 = Tile(10, BLACK)
+# tile27 = Tile(11, GREEN)
+#
+# tile21 = Tile(13, BLUE)
+# tile22 = Tile(12, BLUE)
+# tile23 = Tile(13, RED)
+#
+# tile28 = Tile(15, RED)
+# tile29 = Tile(14, BLUE)
+# tile30 = Tile(14, BLACK)
+# tile31 = Tile(15, GREEN)
+#
+# tile32 = Tile(1, GREEN)
+#
+# tile33 = Tile(2, RED)
+# tile34 = Tile(6, BLUE)
+# tile35 = Tile(6, BLACK)
+# tile36 = Tile(7, BLACK)
+#
+# tile37 = Tile(8, GREEN)
+# tile38 = Tile(10, GREEN)
+# tile39 = Tile(8, RED)
+#
+# tile40 = Tile(6, RED)
+# tile41 = Tile(11, BLUE)
+# tile42 = Tile(6, BLACK)
+# tile43 = Tile(11, GREEN)
+#
+# player_1 = AIPlayer("Peanuts", [tile7, tile1, tile2, tile3, tile12, tile13, tile14, tile15, tile16, tile17, tile18, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, tile19, tile20, tile21, tile26, tile22, tile23]) #, tile24, tile25, tile26, tile11, tile27, tile28, tile29, tile30]) #, tile31, tile32, tile33, tile34, tile35, tile36, tile37, tile38, tile39, tile40, tile41, tile42, tile43])
+# for i in range(len(player_1.rack.tiles)):
+#     if player_1.rack.tiles[i] is not None:
+#         player_1.rack.tiles[i].position = [0,i]
+# player_1.is_greater_30 = True
+#
+# board = []  # initialise the game board as an empty list.
+# rows, columns = 9, 20
+# for i in range(rows):
+#     new_row = []
+#     for j in range(columns): # each row is full of Nones to denote empty spaces
+#         new_row.append(None)
+#     board.append(new_row)
+#
+# tile8 = Tile(1, BLUE)
+# tile9 = Tile(1, BLACK)
+# tile10 = Tile(1, RED)
+#
+# board[0][2] = tile8
+# board[0][3] = tile9
+# board[0][4] = tile10
+#
+# board[3][3] = tile4
+# board[3][4] = tile5
+# board[3][6] = tile6
+#
+# #for row in board:
+#     #print(row)
+#
+# #evens = scan_rack_evens(player_1)
+# #for tile in evens:
+# #     print(tile)
+#
+# #odds = scan_rack_odds(player_1)
+# #for tile in odds:
+# #    print(tile)
+#
+# #same = scan_rack_group(player_1)
+# #for tile in same:
+# #   print(tile)
+#
+# # print("player tiles are: ")
+# # for tile in player_1.rack.tiles:
+# #     print(tile)
+#
+# print(player_1.make_moves_rack(player_1, board))
+# #print(player_1.extend_board_groups(board))
+# #print(player_1.extend_board_runs(board))
+#
+# # for set in player_1.get_rack_moves(player_1):
+# #     print("New set is")
+# #     for tile in set:
+# #         print(tile)
+# #     print()

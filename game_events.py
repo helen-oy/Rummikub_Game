@@ -42,6 +42,34 @@ class GameEvents:
             else:
                 print("false")
 
+    def handle_computer_moves(self):
+        computer_player = self.game_play.comp_player
+        computer_tiles = computer_player.get_tiles()
+        computer_tile_surfaces = self.game_surfaces.comp_tiles_surfaces
+        game_board = self.game_play.game_state
+
+        rack_moves = computer_player.make_moves_rack(computer_player, game_board)
+        print(rack_moves)
+        # board_extensions =
+
+        tile_positions = rack_moves[0]
+        board_positions = rack_moves[1]
+
+        print("Tile to board positions:", len(tile_positions), len(board_positions))
+
+        for k in range(len(tile_positions)):
+            print("tile position is: ", tile_positions[k])
+            print("board position is: ", board_positions[k])
+            # self.selected_rack_tile_index = tile_positions[k]
+            # i, j = board_positions[k]
+            # self.game_play.update_game_state(computer_tiles[self.selected_rack_tile_index], i, j)
+            # self.game_play.comp_player.remove_tile(self.selected_rack_tile_index)
+            # self.game_surfaces.update_comp_tiles_surfaces()
+            # self.game_surfaces.update_game_state_tiles_surfaces()
+            # self.selected_rack_tile_index = None
+
+        # submit move here
+        # end computer's turn
 
     def handle_user_player_rack_events(self, pos):
         user_tiles = self.game_play.player.get_tiles()
