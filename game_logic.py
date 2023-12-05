@@ -185,6 +185,7 @@ class AIPlayer(Player): # still working on it, Praise make changes
                     position_in_board.append([i,j])
                     j += 1
                 i += 1
+                j = 0
         
         for row_index, each_row in enumerate(game_board): # outer loop, checks each row and saves the row index
             empty_spaces = [] # store the positions of our empty spaces
@@ -348,6 +349,7 @@ class GameBoard:
                 else:
                     set = []  # if the move was valid, set should be reset
             i += 1  # update the row position as we move through the board
+            j = 0
 
         if status:  # if status is true after we have looped through the board, then the board is valid. So we update the gameboard and end the player's turn
             self.board = copy.deepcopy(game_board)
