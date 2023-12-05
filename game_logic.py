@@ -139,7 +139,7 @@ class AIPlayer(Player): # still working on it, Praise make changes
         max_size = 5 # the maximum size of a possible move.
         depth = 8 # how far the computer should go in its quest to find valid possible moves. At a depth of 5, the computer (if that many exist) would find the 5 highest scoring moves. 
 
-        all_sets = [scan_rack_odds(which_player), scan_rack_evens[which_player],scan_rack_group(which_player)]
+        all_sets = [scan_rack_odds(which_player), scan_rack_evens(which_player),scan_rack_group(which_player)]
         # rack = copy.deepcopy(which_player.rack.tiles)  # Deep copy to avoid modifying the original rack. The computer removes tiles from this rack to know what the next highest scoring move will be after it has played the first.
         rack = all_sets[0]
         moves_to_play = [] # a list of moves to play on the board. Computer returns this list when it is done searching.
