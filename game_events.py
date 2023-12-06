@@ -49,10 +49,11 @@ class GameEvents:
         game_board = self.game_play.game_state # get the gameboard.
 
         rack_moves = computer_player.make_moves_rack(which_player, game_board)
-        # board_extensions =
 
         tile_positions = rack_moves[0]
         board_positions = rack_moves[1]
+
+        no_moves_played = 0
 
         if len(tile_positions) > 0: # if there are moves on the rack
 
@@ -71,7 +72,50 @@ class GameEvents:
 
             # submit move here
             self.game_play.submit_game_state()
-        # end computer's turn
+        else:
+            no_moves_played += 1
+
+        board_extensions = computer_player.extend_board(which_player, game_board)
+
+        tile_positions = board_extensions[0]
+        board_positions = board_extensions[1]
+
+        if len(tile_positions) > 0:  # if there are moves on the rack
+
+            for k in range(len(tile_positions)):
+                self.selected_rack_tile_index = tile_positions[k]
+                i, j = board_positions[k]
+                self.game_play.update_game_state(tiles_to_use[self.selected_rack_tile_index], i, j)
+                if isinstance(which_player, game_play.AIPlayer):
+                    self.game_play.comp_player.remove_tile(self.selected_rack_tile_index)
+                    self.game_surfaces.update_comp_tiles_surfaces()
+                else:
+                    self.game_play.player.remove_tile(self.selected_rack_tile_index)
+                    self.game_surfaces.update_player_tiles_surfaces()
+                self.game_surfaces.update_game_state_tiles_surfaces()
+                self.selected_rack_tile_index = None
+
+            # submit move here
+            self.game_play.submit_game_state()
+        else:
+            no_moves_played += 1
+
+        if no_moves_played < 2:
+            which_player.turn = False
+        elif no_moves_played == 2:
+            print(self.game_surfaces.drawn_pool_tiles_surfaces)
+            # for i, tile in enumerate(which_player.get_tiles()):
+            #     if tile is not None:
+            #         if isinstance(which_player, game_play.AIPlayer):
+            #             self.game_play.comp_player.add_tile(self.game_play.drawn_tiles_from_pool[0], i)
+            #             self.game_surfaces.update_comp_tiles_surfaces()
+            #         else:
+            #             self.game_play.player.add_tile(self.game_play.drawn_tiles_from_pool[0], i)
+            #             self.game_surfaces.update_player_tiles_surfaces()
+            #         self.game_play.pool.update_pool(self.game_play.drawn_tiles_from_pool[1])
+            #         break
+            # which player picks a tile
+            which_player.turn = False
 
     def handle_user_player_rack_events(self, pos):
         user_tiles = self.game_play.player.get_tiles()

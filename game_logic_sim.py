@@ -426,32 +426,35 @@ def is_empty(game_board):
 #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 def scan_rack_runs_even(player):
     even_tiles = [t for t in player.rack.tiles if t is not None and t.value%2==0]
-    rack_runs_even = [list(filter(lambda tile: tile.color==c,even_tiles)) for c in tile_colors]
-    for sublist in rack_runs_even:
-        sublist.sort(key=lambda x: x.value)
+    return even_tiles
+    # rack_runs_even = [list(filter(lambda tile: tile.color==c,even_tiles)) for c in tile_colors]
+    # for sublist in rack_runs_even:
+      #  sublist.sort(key=lambda x: x.value)
     # validating the sublists in rack
-    valid_even_runs = [sublist for sublist in rack_runs_even if is_run(sublist)]
-    return valid_even_runs
+    # valid_even_runs = [sublist for sublist in rack_runs_even if is_run(sublist)]
+    # return valid_even_runs
     # for sublist in rack_runs_even:
     #    if is_run(sublist):
     #        valid_even_runs.append(sublist)
 
 def scan_rack_runs_odd(player):
     odd_tiles = [t for t in player.rack.tiles if t is not None and t.value%2!=0]
-    rack_runs_odd = [list(filter(lambda tile: tile.color==c,odd_tiles)) for c in tile_colors]
-    for sublist in rack_runs_odd:
-        sublist.sort(key=lambda x: x.value)
+    return odd_tiles
+    # rack_runs_odd = [list(filter(lambda tile: tile.color==c,odd_tiles)) for c in tile_colors]
+    # for sublist in rack_runs_odd:
+      #  sublist.sort(key=lambda x: x.value)
     # validating the sublists in rack
-    valid_odd_runs = [sublist for sublist in rack_runs_odd if is_run(sublist)]
-    return valid_odd_runs
+    # valid_odd_runs = [sublist for sublist in rack_runs_odd if is_run(sublist)]
+    # return valid_odd_runs
 
 def scan_rack_group(player):
     rack_groups = [list(filter(lambda tile: tile is not None and tile.value==v,player.rack.tiles)) for v in range(1,16)]
     # removing empty lists
     rack_groups = [g for g in rack_groups if g]
-    valid_groups = [sublist for sublist in rack_groups if is_group(sublist)]
+    return rack_groups
+    # valid_groups = [sublist for sublist in rack_groups if is_group(sublist)]
     # for g in rack_groups:
     #     if is_group(g):
     #         valid_groups.append(g)
-    return valid_groups
+    # return valid_groups
     
