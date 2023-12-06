@@ -145,7 +145,7 @@ class AIPlayer(Player): # still working on it, Praise make changes
         rack = all_sets[0]
         moves_to_play = [] # a list of moves to play on the board. Computer returns this list when it is done searching.
 
-        def find_highest_move(rack, depth, all_sets): # we will generate all possible moves (not the most optimal approach), find the valid ones, and find the highest scoring valid move
+        def find_highest_move(rack, depth, all_sets, moves_to_play): # we will generate all possible moves (not the most optimal approach), find the valid ones, and find the highest scoring valid move
 
             combos = [] # list to store all possible arrangements of tiles in the rack
             valid_combos = [] # list to store the combinations that are valid
@@ -173,9 +173,9 @@ class AIPlayer(Player): # still working on it, Praise make changes
             elif depth == 3:
                 new_rack = all_sets[2] 
 
-            find_highest_move(new_rack, depth - 1, all_sets) # Call the function within itself but with the updated rack
+            find_highest_move(new_rack, depth - 1, all_sets, moves_to_play) # Call the function within itself but with the updated rack
 
-        find_highest_move(rack, depth, all_sets) # Start the recursion herre
+        find_highest_move(rack, depth, all_sets, moves_to_play) # Start the recursion herre
 
         return moves_to_play # return the list of all moves to play.
     
@@ -201,6 +201,8 @@ class AIPlayer(Player): # still working on it, Praise make changes
                     position_in_board.append([i,j])
                     j += 1
                 i += 1
+                j = 0
+            return [position_in_rack, position_in_board]
         
         for row_index, each_row in enumerate(game_board): # outer loop, checks each row and saves the row index
             empty_spaces = [] # store the positions of our empty spaces
@@ -214,7 +216,7 @@ class AIPlayer(Player): # still working on it, Praise make changes
                             if len(move) == len(empty_spaces) - 2: # if we find a move that we have enough space for.
                                 needed_spaces.remove(len(empty_spaces)) # remove that space from our list of empty spaces so we know it has been used up on the next iteration
                                 for tile in move:
-                                    position_in_rack.append([tile.position[1]]) # add the position in rack to our list
+                                    position_in_rack.append(tile.position[1]) # add the position in rack to our list
                                 for i in range(1, len(empty_spaces) - 1):
                                     position_in_board.append(empty_spaces[i]) # add the position of the empty spaces in our list, starting from 1 for extra spacing between tiles on the board.
 
@@ -229,7 +231,7 @@ class AIPlayer(Player): # still working on it, Praise make changes
                     if len(move) == len(empty_spaces) - 2:
                         needed_spaces.remove(len(empty_spaces))
                         for tile in move:
-                            position_in_rack.append([tile.position[1]])
+                            position_in_rack.append(tile.position[1])
                         for i in range(1, len(empty_spaces) - 1):
                             position_in_board.append(empty_spaces[i])
 

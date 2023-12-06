@@ -42,33 +42,35 @@ class GameEvents:
             else:
                 print("false")
 
-    def handle_computer_moves(self):
-        computer_player = self.game_play.comp_player
-        computer_tiles = computer_player.get_tiles()
-        computer_tile_surfaces = self.game_surfaces.comp_tiles_surfaces
-        game_board = self.game_play.game_state
+    def handle_computer_moves(self, which_player): # The computer makes moves for which_player. which_player could be itself or the human player.
+        computer_player = self.game_play.comp_player # get the computer player because the algorithm to make moves is a method of its class
+        tiles_to_use = which_player.get_tiles() # the tiles we will be making use of who the computer is playing for
+        tile_surfaces = self.game_surfaces.comp_tiles_surfaces if isinstance(which_player, game_play.AIPlayer) else self.game_surfaces.player_tiles_surfaces # game surface is computer's if which player is computer else it is user's
+        game_board = self.game_play.game_state # get the gameboard.
 
-        rack_moves = computer_player.make_moves_rack(computer_player, game_board)
-        print(rack_moves)
+        rack_moves = computer_player.make_moves_rack(which_player, game_board)
         # board_extensions =
 
         tile_positions = rack_moves[0]
         board_positions = rack_moves[1]
 
-        print("Tile to board positions:", len(tile_positions), len(board_positions))
+        if len(tile_positions) > 0: # if there are moves on the rack
 
-        for k in range(len(tile_positions)):
-            print("tile position is: ", tile_positions[k])
-            print("board position is: ", board_positions[k])
-            # self.selected_rack_tile_index = tile_positions[k]
-            # i, j = board_positions[k]
-            # self.game_play.update_game_state(computer_tiles[self.selected_rack_tile_index], i, j)
-            # self.game_play.comp_player.remove_tile(self.selected_rack_tile_index)
-            # self.game_surfaces.update_comp_tiles_surfaces()
-            # self.game_surfaces.update_game_state_tiles_surfaces()
-            # self.selected_rack_tile_index = None
+            for k in range(len(tile_positions)):
+                self.selected_rack_tile_index = tile_positions[k]
+                i, j = board_positions[k]
+                self.game_play.update_game_state(tiles_to_use[self.selected_rack_tile_index], i, j)
+                if isinstance(which_player, game_play.AIPlayer):
+                    self.game_play.comp_player.remove_tile(self.selected_rack_tile_index)
+                    self.game_surfaces.update_comp_tiles_surfaces()
+                else:
+                    self.game_play.player.remove_tile(self.selected_rack_tile_index)
+                    self.game_surfaces.update_player_tiles_surfaces()
+                self.game_surfaces.update_game_state_tiles_surfaces()
+                self.selected_rack_tile_index = None
 
-        # submit move here
+            # submit move here
+            self.game_play.submit_game_state()
         # end computer's turn
 
     def handle_user_player_rack_events(self, pos):

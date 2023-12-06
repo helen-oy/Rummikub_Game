@@ -123,8 +123,12 @@ while running:
             game_events.handle_events(pos)
 
     if computer_player.turn:
-        game_events.handle_computer_moves()
+        game_events.handle_computer_moves(computer_player)
         computer_player.turn = False
+
+    if not computer_player.turn:
+        game_events.handle_computer_moves(user_player)
+        computer_player.turn = True
 
     # show pick tile
 
