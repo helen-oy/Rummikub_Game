@@ -259,7 +259,9 @@ class AIPlayer(Player): # still working on it, Praise make changes
 
 
     def extend_board_runs(self,game_board):
-        board_cleaned=self.format_board(game_board)
+        ## Funny, now the player owns a copy of the gameboard
+        self.board = copy.deepcopy(game_board)
+        board_cleaned=self.format_board(self.board)
         # Game board is taken as a list of lists where sublists are runs or sets
         runs_board = []
         for i, sublist in enumerate(board_cleaned):
@@ -277,23 +279,24 @@ class AIPlayer(Player): # still working on it, Praise make changes
                 colors.append(t.color)
         colors = list(set(colors))
         # print('colors',colors)
-    
+
+        self.rack_copy = copy.deepcopy(self.rack.tiles)
         found_match = False  # flag to check if a match was found
-        for rack_tile in self.rack.tiles:
+        for rack_tile in self.rack_copy:
             # print(rack_tile)
             if rack_tile is not None and rack_tile.color in colors:
                 print('color matched')
                 for i,board_run in enumerate(runs_board):
                     if rack_tile.value-board_run[0].value==-2 and rack_tile.color==board_run[0].color:
                         print('Found LOWER',rack_tile,'in board run',i)
-                        play_tile = self.rack.tiles.pop(self.rack.tiles.index(rack_tile))
+                        play_tile = self.rack_copy.pop(self.rack_copy.index(rack_tile))
                         board_run.insert(0,play_tile)
                         found_match = True  # set flag to True
                     else:
                         print('no match [LOWER] for',rack_tile, 'in board run',i)
                     if rack_tile.value-board_run[-1].value==2 and rack_tile.color==board_run[-1].color:
                         print('found UPPER',rack_tile,'in board run',i)
-                        play_tile = self.rack.tiles.pop(self.rack.tiles.index(rack_tile))
+                        play_tile = self.rack_copy.pop(self.rack_copy.index(rack_tile))
                         board_run.insert(len(board_run),play_tile)
                         found_match = True  # set flag to True
                     else:
@@ -307,8 +310,9 @@ class AIPlayer(Player): # still working on it, Praise make changes
         return runs_board
         # only return False if no match was found
 
-    def extend_board_groups(self,game_board): # scans the rack and play tiles
-        board_cleaned=self.format_board(game_board)
+    def extend_board_groups(self,game_board): # scans the rack and play tiles, 
+        self.board = copy.deepcopy(game_board)
+        board_cleaned=self.format_board(self.board)
         groups_board = []
         for sublist in board_cleaned:
             if is_group(sublist):
@@ -328,14 +332,15 @@ class AIPlayer(Player): # still working on it, Praise make changes
         print(values)
         print(colors)
 
+        # self.rack_copy = copy.deepcopy(self.rack.tiles) # activate only if we use them separately
         found_match = False
-        for rack_tile in self.rack.tiles:
+        for rack_tile in self.rack_copy:
             if rack_tile is not None and rack_tile.value in values:
                 print('Value matched',rack_tile)
                 for i, sublist in enumerate(groups_board):
                     if rack_tile.value==sublist[0].value and rack_tile.color not in [c.color for c in sublist]:
                         print('Found',rack_tile,'in group',i)
-                        play_tile = self.rack.tiles.pop(self.rack.tiles.index(rack_tile))
+                        play_tile = self.rack_copy.pop(self.rack_copy.index(rack_tile))
                         sublist.append(play_tile)
                         found_match = True
         if not found_match:
@@ -345,16 +350,13 @@ class AIPlayer(Player): # still working on it, Praise make changes
             for t in lst:
                 print(t)
         return groups_board
-    ###############
-    def draw_2_tiles(self,pool):
-        t1,t2= pool.draw_2_tiles()
-        return [t1,t2]
     
-    def return_1_tile(self,pool):
-        t1,t2= pool.draw_2_tiles()
-    
-
-                    
+    # Use this to run extensions
+    def extend_all(self,game_board):
+        for_runs =self.extend_board_runs(game_board)
+        for_group = self.extend_board_groups(game_board)
+        return for_runs, for_group
+             
 
 
 # bukayo = Player('Bukayo Saka')
