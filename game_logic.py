@@ -245,32 +245,34 @@ class AIPlayer(Player): # still working on it, Praise make changes
     
     def format_board(self,game_board): 
         board_sets_runs = []
-        for row in game_board:
+        board_positions = {}
+        for i, row in enumerate(game_board):
             temp = []
-            for item in row:
+            for j, item in enumerate(row):
                 if item is not None:
                     temp.append(item)
+                    board_positions[item] = [i, j]
                 elif temp:
                     board_sets_runs.append(temp)
                     temp = []
             if temp:
                 board_sets_runs.append(temp)
-        return board_sets_runs
+        return board_sets_runs, board_positions
 
 
-    def extend_board_runs(self,game_board):
-        ## Funny, now the player owns a copy of the gameboard
-        self.board = copy.deepcopy(game_board)
-        board_cleaned=self.format_board(self.board)
+    def extend_board(self, which_player, game_board):
+
+        board_cleaned, board_positions = self.format_board(game_board)
+        tile_pos_in_rack = []
+        tile_pos_for_board = []
+
+        rack = copy.deepcopy(which_player.rack.tiles)
+
         # Game board is taken as a list of lists where sublists are runs or sets
         runs_board = []
         for i, sublist in enumerate(board_cleaned):
             if is_run(sublist):
                 runs_board.append(sublist)
-        for i,lst in enumerate(runs_board):
-            print("old:",i)
-            for t in lst:
-                print(t)
 
         # # get colors of runs
         colors = []
@@ -280,48 +282,45 @@ class AIPlayer(Player): # still working on it, Praise make changes
         colors = list(set(colors))
         # print('colors',colors)
 
-        self.rack_copy = copy.deepcopy(self.rack.tiles)
-        found_match = False  # flag to check if a match was found
-        for rack_tile in self.rack_copy:
-            # print(rack_tile)
+        found_run = False  # flag to check if a match was found
+        for rack_tile in rack:
             if rack_tile is not None and rack_tile.color in colors:
-                print('color matched')
-                for i,board_run in enumerate(runs_board):
-                    if rack_tile.value-board_run[0].value==-2 and rack_tile.color==board_run[0].color:
-                        print('Found LOWER',rack_tile,'in board run',i)
-                        play_tile = self.rack_copy.pop(self.rack_copy.index(rack_tile))
-                        board_run.insert(0,play_tile)
-                        found_match = True  # set flag to True
-                    else:
-                        print('no match [LOWER] for',rack_tile, 'in board run',i)
-                    if rack_tile.value-board_run[-1].value==2 and rack_tile.color==board_run[-1].color:
-                        print('found UPPER',rack_tile,'in board run',i)
-                        play_tile = self.rack_copy.pop(self.rack_copy.index(rack_tile))
-                        board_run.insert(len(board_run),play_tile)
-                        found_match = True  # set flag to True
-                    else:
-                        print('no match [UPPER] for',rack_tile,'in board run',i)
-        for i,lst in enumerate(runs_board):
-            print("new:",i)
-            for t in lst:
-                print(t)
-        if not found_match:
-            return False
-        return runs_board
-        # only return False if no match was found
+                for board_run in runs_board:
+                    if rack_tile.value-board_run[0].value == -2 and rack_tile.color == board_run[0].color:
+                        i, j = board_positions[board_run[0]]
+                        if j >= 4:
+                            if game_board[i][j-1] is None and game_board[i][j-2] is None:
+                                if rack_tile.position[1] not in tile_pos_in_rack:
+                                    tile_pos_in_rack.append(rack_tile.position[1])
+                                    tile_pos_for_board.append([i, j-1])
+                                    found_run = True  # set flag to True (technically only true if there is enough space on the board to play the move)
+                        elif 4 > j > 0:
+                            if game_board[i][j-1] is None:
+                                if rack_tile.position[1] not in tile_pos_in_rack:
+                                    tile_pos_in_rack.append(rack_tile.position[1])
+                                    tile_pos_for_board.append([i, j-1])
+                                    found_run = True
 
-    def extend_board_groups(self,game_board): # scans the rack and play tiles, 
-        self.board = copy.deepcopy(game_board)
-        board_cleaned=self.format_board(self.board)
+                    if rack_tile.value-board_run[-1].value==2 and rack_tile.color==board_run[-1].color:
+                        i,j = board_positions[board_run[-1]]
+                        if 15 < j < 19:
+                            tile_pos_in_rack.append(rack_tile.position[1])
+                            tile_pos_for_board.append([i, j+1])
+                            found_run = True  # set flag to True
+                        elif j <= 15:
+                            if game_board[i][j + 1] is None and game_board[i][j + 2] is None:
+                                tile_pos_in_rack.append(rack_tile.position[1])
+                                tile_pos_for_board.append([i, j + 1])
+                                found_run = True  # set flag to True
+
+        for position in tile_pos_in_rack:
+            rack[position] = None
+
         groups_board = []
         for sublist in board_cleaned:
             if is_group(sublist):
                 groups_board.append(sublist)
 
-        for i,lst in enumerate(groups_board):
-            print("old:",i)
-            for t in lst:
-                print(t)
             # get values contained in groups_board:
         values = []
         colors = []
@@ -329,37 +328,27 @@ class AIPlayer(Player): # still working on it, Praise make changes
             for t in sublist:
                 values.append(t.value)
                 colors.append(t.color)
-        print(values)
-        print(colors)
 
-        # self.rack_copy = copy.deepcopy(self.rack.tiles) # activate only if we use them separately
         found_match = False
-        for rack_tile in self.rack_copy:
+        for rack_tile in rack:
             if rack_tile is not None and rack_tile.value in values:
-                print('Value matched',rack_tile)
-                for i, sublist in enumerate(groups_board):
+                for sublist in groups_board:
                     if rack_tile.value==sublist[0].value and rack_tile.color not in [c.color for c in sublist]:
-                        print('Found',rack_tile,'in group',i)
-                        play_tile = self.rack_copy.pop(self.rack_copy.index(rack_tile))
-                        sublist.append(play_tile)
-                        found_match = True
-        if not found_match:
-            return False
-        for i,lst in enumerate(groups_board):
-            print("new:",i)
-            for t in lst:
-                print(t)
-        return groups_board
-    
-    # Use this to run extensions
-    def extend_all(self,game_board):
-        for_runs =self.extend_board_runs(game_board)
-        for_group = self.extend_board_groups(game_board)
-        return for_runs, for_group
-             
+                        i, j = board_positions[sublist[0]]
+                        if j >= 4:
+                            if game_board[i][j-1] is None and game_board[i][j-2] is None:
+                                if rack_tile.position[1] not in tile_pos_in_rack:
+                                    tile_pos_in_rack.append(rack_tile.position[1])
+                                    tile_pos_for_board.append([i, j-1])
+                                    found_match = True
+                        elif 4 > j > 0:
+                            if game_board[i][j - 1] is None:
+                                if rack_tile.position[1] not in tile_pos_in_rack:
+                                    tile_pos_in_rack.append(rack_tile.position[1])
+                                    tile_pos_for_board.append([i, j - 1])
+                                    found_match = True
 
-
-# bukayo = Player('Bukayo Saka')
+        return [tile_pos_in_rack, tile_pos_for_board]
 
 class GameBoard:
     def __init__(self):
@@ -554,7 +543,7 @@ def scan_rack_evens(player):
 # tile42 = Tile(6, BLACK)
 # tile43 = Tile(11, GREEN)
 #
-# player_1 = AIPlayer("Peanuts", [tile7, tile1, tile2, tile3, tile12, tile13, tile14, tile15, tile16, tile17, tile18, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, tile19, tile20, tile21, tile26, tile22, tile23]) #, tile24, tile25, tile26, tile11, tile27, tile28, tile29, tile30]) #, tile31, tile32, tile33, tile34, tile35, tile36, tile37, tile38, tile39, tile40, tile41, tile42, tile43])
+# player_1 = AIPlayer("Peanuts", [tile7, tile12, tile13, tile14, tile15, tile16, tile17, tile18, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, tile19, tile20, tile21, tile26, tile22, tile23]) #, tile24, tile25, tile26, tile11, tile27, tile28, tile29, tile30]) #, tile31, tile32, tile33, tile34, tile35, tile36, tile37, tile38, tile39, tile40, tile41, tile42, tile43])
 # for i in range(len(player_1.rack.tiles)):
 #     if player_1.rack.tiles[i] is not None:
 #         player_1.rack.tiles[i].position = [0,i]
@@ -578,7 +567,11 @@ def scan_rack_evens(player):
 #
 # board[3][3] = tile4
 # board[3][4] = tile5
-# board[3][6] = tile6
+# board[3][5] = tile6
+#
+# board[5][0] = tile1
+# board[5][1] = tile2
+# board[5][2] = tile3
 #
 # #for row in board:
 #     #print(row)
@@ -600,6 +593,7 @@ def scan_rack_evens(player):
 # #     print(tile)
 #
 # print(player_1.make_moves_rack(player_1, board))
+# print(player_1.extend_board(player_1, board))
 # #print(player_1.extend_board_groups(board))
 # #print(player_1.extend_board_runs(board))
 #
