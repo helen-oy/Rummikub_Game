@@ -1,13 +1,15 @@
-from game_logic import Pool, Player, GameBoard
+import random
 
-time_limit = 30
+from game_logic import Pool, Player, GameBoard, AIPlayer, toggle_players
+
+time_limit = 15
 
 
 class GamePlay:
     def __init__(self):
         self.comp_tile_visible = False
         self.pool = Pool()
-        self.comp_player = Player("Comp", self.pool.initial_tiles())
+        self.comp_player = AIPlayer("Comp", self.pool.initial_tiles())
         self.player = Player("User", self.pool.initial_tiles())
         self.previous_state = self.player.rack_deep_copy()
         self.game_board = GameBoard()
@@ -17,11 +19,20 @@ class GamePlay:
         self.invalid_position = []
         self.selected_rack_tile_index = None
         self.selected_game_board_tile_positions = None
-        self.user_turn = True
+        self.comp_random_time = 0
 
         # position used for selecting tiles from board or rack e.g[0,1] = [row, col]
         self.selected_position = None
         self.timer = time_limit
+
+    def assign_rack_positions(self):
+        for i, tile in enumerate(self.player.rack.tiles):
+            if tile is not None:
+                tile.position[1] = i
+
+        for i, tile in enumerate(self.comp_player.rack.tiles):
+            if tile is not None:
+                tile.position[1] = i
 
     def toggle_comp_tile_visible(self):
         self.comp_tile_visible = not self.comp_tile_visible
@@ -43,6 +54,25 @@ class GamePlay:
     def reset_draw(self):
         self.remaining_tiles_in_pool = self.pool.remaining_tiles()
         self.drawn_tiles_from_pool = []
+
+    def toggle_players(self):
+        toggle_players(self.comp_player, self.player)
+        if self.comp_player.turn:
+            # adding few seconds random delay
+            self.comp_random_time = random.randint(2, 5)
+        else:
+            self.starting_setup_for_user_turn()
+
+        self.selected_position = None
+        self.selected_game_board_tile_positions = None
+        self.invalid_position = []
+        self.update_timer()
+
+        print("RANDOM", self.comp_random_time, "User= ", self.player.turn, "AI= ", self.comp_player.turn)
+
+    def delay_com_turn(self):
+        if self.comp_random_time > 0:
+            self.comp_random_time -= 1
 
     def copy_player_initial_state(self):
         self.player.rack.tiles = self.previous_state
@@ -79,21 +109,19 @@ class GamePlay:
         self.game_state[initial_row][initial_col] = None
 
     def starting_setup_for_user_turn(self):
-        self.previous_state = self.player.rack_deep_copy()
+        self.copy_player_initial_state()
 
-    def finalising_user_turn(self, validated, time):
+    def finalising_user_turn(self, validated):
         if not validated:
             self.game_state = self.game_board.get_copy()
-            if time is 0:
-                self.player.rack.tiles = self.previous_state
-                self.add_1_tile_to_rack(self.pool.draw_1_tile())
 
-        self.toggle_turn()
-
-    def toggle_turn(self):
-        self.user_turn = not self.user_turn
+    def user_timeout(self):
+        self.player.rack.tiles = self.previous_state
+        self.add_1_tile_to_rack(self.pool.draw_1_tile())
+        self.game_state = self.game_board.get_copy()
 
     def update_timer(self):
         if self.timer > 0:
             self.timer = self.timer - 1
-
+        else:
+            self.timer = time_limit

@@ -29,9 +29,18 @@ screen_center_x = screen_width * 0.5
 screen_center_y = screen_height * 0.5
 show = False
 
-background = "./board.png"
-game_background = "./background.jpg"
-button = "./b_4.png"
+circle_diameter = 65
+
+path = ".././"
+background = path+"board.png"
+game_background = path+"background.jpg"
+button = path+"b_4.png"
+draw_button = path+"draw.png"
+circle = path + "circle.png"
+tile_image = path + "tile.png"
+tile_error = path + "tile_error.png"
+tile_selected = path + "tile_selected.png"
+
 
 
 class GameRects:
@@ -81,6 +90,7 @@ class GameRects:
         #                                                                 game_play.game_state,
         #                                                                 game_font)
         # self.pool_tile_rects = []
+
 
         # Creates game background
         self.game_background_surface = GameRects.create_game_background_surface()
@@ -147,8 +157,10 @@ class GameRects:
                                                                                self.game_font)
 
     def update_remaining_tiles(self):
-        self.remaining_tile_surface = GameRects.remaining_tile_button(self.game_play.remaining_tiles_in_pool,
-                                                                      self.game_font)
+        self.remaining_tile_surface = GameRects.remaining_tile_button(self.game_play.remaining_tiles_in_pool,self.game_font)
+
+    def get_time(self):
+        return GameRects.time_surface(self.game_play.timer, self.game_font)
 
     @classmethod
     def create_tile_drawn_from_pool(cls, tiles, game_font):
@@ -194,6 +206,7 @@ class GameRects:
     @classmethod
     def create_board_surfaces(cls, playing_board_x, playing_board_y, game_state, game_font, invalid_position, selected_tile_board_indices):
         rect = []
+        print("true", invalid_position, "iram")
         for i in range(num_of_rows):
             grid_rect = []
             for j in range(num_of_columns):
@@ -203,7 +216,7 @@ class GameRects:
                     show_error_tile = True
                 if selected_tile_board_indices is not None and selected_tile_board_indices == [i,j]:
                     selected_tile_board = True
-                    print("true", selected_tile_board_indices, "iram")
+
 
 
                 tile = game_state[i][j]
@@ -274,15 +287,17 @@ class GameRects:
 
     @classmethod
     def draw_tiles_button(cls):
-        draw_tile_surface = Surface((40, 40))
-        draw_tile_surface.fill((0, 0, 0))
+        draw_tile_surface = pygame.image.load(draw_button)
+
+        # draw_tile_surface = Surface((40, 40))
+        # draw_tile_surface.fill((0, 0, 0))
         draw_tile_surface_rect = draw_tile_surface.get_rect()
         draw_tile_surface_rect.topleft = (screen_width * 0.03, screen_height * 0.55)
-        game_font_size_10 = font.SysFont('arial', 10, bold=True)
-        text = game_font_size_10.render("Draw Tile", True, (255, 0, 255))
-        text_rect = text.get_rect()
-        text_rect.topleft = (0, 35 * 0.2)
-        draw_tile_surface.blit(text, text_rect)
+        # game_font_size_10 = font.SysFont('arial', 10, bold=True)
+        # text = game_font_size_10.render("Draw Tile", True, (255, 0, 255))
+        # text_rect = text.get_rect()
+        # text_rect.topleft = (0, 35 * 0.2)
+        # draw_tile_surface.blit(text, text_rect)
         return draw_tile_surface, draw_tile_surface_rect
 
     @classmethod
@@ -292,19 +307,32 @@ class GameRects:
         img_rect.center = ((screen_width - playing_board_width) / 4, screen_height / 2)
         return img, img_rect
 
+    @classmethod
+    def time_surface(cls, time, game_font):
+        time_surface = pygame.image.load(circle)
+        time_rect = time_surface.get_rect()
+        time_rect.center = (screen_width * 0.95, screen_height / 2)
+        text = game_font.render(str(time), True, (255, 255, 255))
+        text_rect = text.get_rect()
+        text_rect.center = (circle_diameter * 0.5, circle_diameter * 0.5)
+        time_surface.blit(text, text_rect)
+
+        return time_surface, time_rect
+
+
 
 def build_tile(tile, font, show_number=True, show_error=False, selected_tile_rack=False, selected_tile_rack_borad = False):
     tile_surface = Surface((42, 50), pygame.SRCALPHA)
     tile_surface = tile_surface.convert_alpha()
     tile_surface.fill((0, 0, 0, 100))
     if tile is not None:
-        tile_surface = pygame.image.load('tile.png')
+        tile_surface = pygame.image.load(tile_image)
         if show_error:
-            tile_surface = pygame.image.load('tile_error.png')
+            tile_surface = pygame.image.load(tile_error)
         if selected_tile_rack:
-            tile_surface = pygame.image.load('tile_selected.png')
+            tile_surface = pygame.image.load(tile_selected)
         if selected_tile_rack_borad:
-            tile_surface = pygame.image.load('tile_selected.png')
+            tile_surface = pygame.image.load(tile_selected)
 
 
         tile_surface = pygame.transform.scale(tile_surface, (42, 50))
