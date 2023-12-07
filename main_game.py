@@ -13,12 +13,13 @@ import pygame
 from game_play import GamePlay
 from game_events import GameEvents, every_second_timer_tick_event
 
-#init()
 
-screen = display.set_mode((screen_width, screen_height))
-clock = time.Clock()
+# init()
+
 
 def main_game():
+    screen = display.set_mode((screen_width, screen_height))
+
     game_font = pygame.font.SysFont('arial', 30, bold=True)
     game_play = GamePlay()
     game_surfaces = GameRects(game_play, game_font)
@@ -115,7 +116,6 @@ def main_game():
 
             if e.type == every_second_timer_tick_event:
                 game_events.handle_countdown_event()
-
 
         text = game_font.render(str(game_play.comp_random_time), True, (255, 255, 255))
         screen.blit(text, (0, 0))
