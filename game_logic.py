@@ -140,18 +140,14 @@ class AIPlayer(Player): # still working on it, Praise make changes
 
     def get_rack_moves(self, which_player): # this function takes in the player the AI should make moves for (on the computers turn, it will take in computer. When player clicks "Play for me" it will take in player).
         from itertools import permutations # so we can easily generate arrangements of tiles in the rack and find possible moves
-    
-        min_size = 3 # the minimum size of a possible move. 
-        max_size = 3 # the maximum size of a possible move.
-        depth = 9 # how far the computer should go in its quest to find valid possible moves. At a depth of 5, the computer (if that many exist) would find the 5 highest scoring moves.
 
-        all_sets = [scan_rack_odds(which_player), scan_rack_evens(which_player),scan_rack_group(which_player)]
-        # rack = copy.deepcopy(which_player.rack.tiles)  # Deep copy to avoid modifying the original rack. The computer removes tiles from this rack to know what the next highest scoring move will be after it has played the first.
-        rack = all_sets[0]
+        min_size = 3 # the minimum size of a possible move.
+        max_size = 3 # the maximum size of a possible move.
+        depth = 6 # how far the computer should go in its quest to find valid possible moves. At a depth of 5, the computer (if that many exist) would find the 5 highest scoring moves.
+
         moves_to_play = [] # a list of moves to play on the board. Computer returns this list when it is done searching.
 
         def find_highest_move(rack, depth, all_sets, moves_to_play): # we will generate all possible moves (not the most optimal approach), find the valid ones, and find the highest scoring valid move
-
             combos = [] # list to store all possible arrangements of tiles in the rack
             valid_combos = [] # list to store the combinations that are valid
 
@@ -164,25 +160,22 @@ class AIPlayer(Player): # still working on it, Praise make changes
                     valid_combos.append(possible_move) # add it to our list of valid combos
 
             if not valid_combos or depth == 0:
-                return  # If there are no more valid movesvor we have reached our specified depth, end recursion
+                return # If there are no more valid moves or we have reached our specified depth, end recursion
 
             highest_combo = max(valid_combos, key=lambda combo: sum(tile.value for tile in combo)) # from the list of valid combos, return the one with the highest sum of tile values
             moves_to_play.append(highest_combo) # add the highest combo as the first move in moves to play.
 
             new_rack = [tile for tile in rack if tile not in highest_combo] # Remove tiles that make up the highest move from the rack so that rack is different on next iteration
-            #new_same = [tile for tile in all_sets[2] if tile not in highest_combo]
-            #all_sets[2] = new_same
-
-            if depth == 6:
-                print("update new rack to use evens")
-                new_rack = all_sets[1]
-            elif depth == 3:
-                print("update new rack to use same")
-                new_rack = all_sets[2]
 
             find_highest_move(new_rack, depth - 1, all_sets, moves_to_play) # Call the function within itself but with the updated rack
 
-        find_highest_move(rack, depth, all_sets, moves_to_play) # Start the recursion herre
+        all_sets = [scan_rack_odds(which_player), scan_rack_evens(which_player)]
+        rack = all_sets[0]
+
+        find_highest_move(rack, depth, all_sets, moves_to_play) # Start the recursion here
+
+        rack = all_sets[1]
+        find_highest_move(rack, depth, all_sets, moves_to_play)  # Start the recursion here
 
         return moves_to_play # return the list of all moves to play.
     
@@ -240,7 +233,6 @@ class AIPlayer(Player): # still working on it, Praise make changes
             #
             #                 break
             empty_spaces = []
-        print("find move says rack to board is", len(position_in_rack), len(position_in_board))
         return [position_in_rack, position_in_board]
     
     def format_board(self,game_board): 
