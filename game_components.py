@@ -311,7 +311,7 @@ class GameRects:
         remaining_tile_surface = pygame.image.load(circle)
         remaining_tile_surface_rect = remaining_tile_surface.get_rect()
         remaining_tile_surface_rect.center = ((screen_width - playing_board_width) / 4, screen_height / 2)
-        img = font.render(str(remaining_tile), True, (255, 255, 0))
+        img = font.render(str(remaining_tile), True, (255, 255, 255))
         img_rect = img.get_rect()
         img_rect.center = (circle_diameter * 0.5, circle_diameter * 0.5)
         remaining_tile_surface.blit(img, img_rect)

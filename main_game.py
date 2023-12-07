@@ -1,21 +1,18 @@
-from pygame import Surface, MOUSEBUTTONDOWN, MOUSEBUTTONUP, draw, mouse
-from pygame import event
-from pygame import QUIT
-from pygame import init
-from pygame import display
-from pygame import time
-from game_components import build_tile, GameRects, rack_length, screen_width, \
-    screen_height, num_of_rows, num_of_columns, playing_board_width
-from game_components import tile_height
-from pygame import font
-from game_logic import Tile
 import pygame
-from game_play import GamePlay
-from game_events import GameEvents, every_second_timer_tick_event
+from pygame import MOUSEBUTTONUP, mouse
+from pygame import QUIT
+from pygame import display
+from pygame import event
+from pygame import init
+from pygame import time
 
+from game_components import GameRects, rack_length, screen_width, \
+    screen_height, num_of_rows, num_of_columns
+from game_events import GameEvents, every_second_timer_tick_event
+from game_logic import Tile
+from game_play import GamePlay
 
 # init()
-
 
 def main_game():
     screen = display.set_mode((screen_width, screen_height))
@@ -34,7 +31,6 @@ def main_game():
 
     time.set_timer(every_second_timer_tick_event, 1000)
 
-
     while game_play.running:
 
         # Creating user and player rack surfaces rects
@@ -51,8 +47,6 @@ def main_game():
 
         user_tiles = user_player.get_tiles()
         computer_tiles = computer_player.get_tiles()
-
-
 
         game_state = game_play.game_state
 
@@ -71,7 +65,6 @@ def main_game():
 
         draw_tiles_button = game_surfaces.draw_tiles_button
         screen.blit(draw_tiles_button[0], draw_tiles_button[1])
-
 
         draw_tile_build = game_surfaces.drawn_pool_tiles_surfaces
         for tile in draw_tile_build:
@@ -115,7 +108,6 @@ def main_game():
         quit_icon = game_surfaces.quit_surface()
         screen.blit(quit_icon[0], quit_icon[1])
 
-
         # Rendring remaining tile on pool circle
         for e in event.get():
             if e.type == QUIT:
@@ -130,14 +122,9 @@ def main_game():
 
         text = game_font.render(str(game_play.comp_random_time), True, (255, 255, 255))
         screen.blit(text, (0, 0))
-        if computer_player.turn and game_play.comp_random_time == 0:
-            game_events.handle_computer_moves(computer_player)
-        #     computer_player.turn = False
-        #
-        # if not computer_player.turn:
-        #     game_events.handle_computer_moves(user_player)
-        #     computer_player.turn = True
 
-        # show pick tile
 
         display.update()
+
+
+# main_game()
