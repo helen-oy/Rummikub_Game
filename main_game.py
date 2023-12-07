@@ -13,7 +13,7 @@ import pygame
 from game_play import GamePlay
 from game_events import GameEvents, every_second_timer_tick_event
 
-# init()
+#init()
 
 screen = display.set_mode((screen_width, screen_height))
 clock = time.Clock()
@@ -23,10 +23,6 @@ def main_game():
     game_play = GamePlay()
     game_surfaces = GameRects(game_play, game_font)
     game_events = GameEvents(game_play, game_surfaces)
-
-    # FIX THIS
-    pick_tile = game_play.pool.draw_2_tiles()
-    remaining_tiles = game_play.pool.remaining_tiles()
 
     user_player = game_play.player
     computer_player = game_play.comp_player
@@ -121,7 +117,7 @@ def main_game():
                 game_events.handle_countdown_event()
 
 
-        text = game_font.render(str(game_play.timer), True, (255, 255, 255))
+        text = game_font.render(str(game_play.comp_random_time), True, (255, 255, 255))
         screen.blit(text, (0, 0))
         if computer_player.turn and game_play.comp_random_time == 0:
             game_events.handle_computer_moves(computer_player)

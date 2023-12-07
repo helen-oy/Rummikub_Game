@@ -1,3 +1,4 @@
+import copy
 import random
 
 from game_logic import Pool, Player, GameBoard, AIPlayer, toggle_players
@@ -59,7 +60,7 @@ class GamePlay:
         toggle_players(self.comp_player, self.player)
         if self.comp_player.turn:
             # adding few seconds random delay
-            self.comp_random_time = random.randint(2, 5)
+            self.comp_random_time = random.randint(8, 10)
         else:
             self.starting_setup_for_user_turn()
 
@@ -67,6 +68,7 @@ class GamePlay:
         self.selected_game_board_tile_positions = None
         self.invalid_position = []
         self.update_timer()
+        # self.previous_state = self.player.rack_deep_copy()
 
         print("RANDOM", self.comp_random_time, "User= ", self.player.turn, "AI= ", self.comp_player.turn)
 
@@ -75,7 +77,7 @@ class GamePlay:
             self.comp_random_time -= 1
 
     def copy_player_initial_state(self):
-        self.player.rack.tiles = self.previous_state
+        self.player.rack.tiles = copy.deepcopy(self.previous_state)
 
     def updated_selected_tile_index(self, index):
         self.selected_rack_tile_index = index
@@ -110,13 +112,14 @@ class GamePlay:
 
     def starting_setup_for_user_turn(self):
         self.copy_player_initial_state()
+        self.game_state = self.game_board.get_copy()
 
     def finalising_user_turn(self, validated):
         if not validated:
             self.game_state = self.game_board.get_copy()
 
     def user_timeout(self):
-        self.player.rack.tiles = self.previous_state
+        self.copy_player_initial_state()
         self.add_1_tile_to_rack(self.pool.draw_1_tile())
         self.game_state = self.game_board.get_copy()
 
@@ -125,3 +128,6 @@ class GamePlay:
             self.timer = self.timer - 1
         else:
             self.timer = time_limit
+
+    def reset_timer(self):
+        self.timer = 0
