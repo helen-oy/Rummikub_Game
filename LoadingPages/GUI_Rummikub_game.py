@@ -19,6 +19,7 @@
 import pygame, sys, threading, time, math
 from pygame.locals import *
 from button import Button
+from soundbutton import Button2
 from main_game import main_game
 
 pygame.init()
@@ -108,13 +109,13 @@ base_font = pygame.font.Font(None, 32)
 username = " "
 
 # create rectangle for username
-input_rect = pygame.Rect(200, 200, 140, 32)
+input_rect = pygame.Rect(550, 300, 140, 32)
 
 # gets active input box
 color_active = pygame.Color('lightskyblue3')
 
 # color of input box.
-color_passive =pygame.Color('chartreuse4')
+color_passive =pygame.Color('bisque1')
 
 color_passive = pygame.Color('chartreuse4')
 color = color_passive
