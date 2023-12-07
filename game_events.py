@@ -16,6 +16,11 @@ class GameEvents:
         self.show = True
 
     def handle_events(self, pos):
+        self.handle_quit(pos)
+        if self.game_surfaces.show_button[1].collidepoint(pos):
+            self.game_play.toggle_comp_tile_visible()
+            self.game_surfaces.update_comp_tiles_surfaces()
+
         if self.game_play.player.turn == False:
             return
         if self.game_surfaces.is_colliding_with_player_rack(pos):
@@ -24,9 +29,6 @@ class GameEvents:
         elif self.game_surfaces.is_colliding_with_game_board(pos):
             self.handle_game_board_events(pos)
 
-        elif self.game_surfaces.show_button[1].collidepoint(pos):
-            self.game_play.toggle_comp_tile_visible()
-            self.game_surfaces.update_comp_tiles_surfaces()
 
         elif self.game_surfaces.draw_tiles_button[1].collidepoint(pos):
             if len(self.game_play.drawn_tiles_from_pool) == 0:
@@ -43,11 +45,11 @@ class GameEvents:
             self.submit_button_event()
         elif self.game_surfaces.play_for_me[1].collidepoint(pos):
             self.game_play.game_state = self.game_play.game_board.get_copy()
-
             self.game_play.copy_player_initial_state()
             self.game_surfaces.update_game_state_tiles_surfaces()
             self.game_surfaces.update_player_tiles_surfaces()
             self.handle_computer_moves(self.game_play.player)
+
 
     def handle_countdown_event(self):
         self.game_play.update_timer()
@@ -241,6 +243,11 @@ class GameEvents:
             self.game_play.invalid_position = validation[1]
             self.game_surfaces.update_game_state_tiles_surfaces()
 
-            # self.submit_button_event()
+
+
+    def handle_quit(self, pos):
+        quit = self.game_surfaces.quit_surface()
+        if quit[1].collidepoint(pos):
+            self.game_play.running = False
 
 

@@ -21,6 +21,8 @@ class GamePlay:
         self.selected_rack_tile_index = None
         self.selected_game_board_tile_positions = None
         self.comp_random_time = 0
+        self.running = True
+
 
         # position used for selecting tiles from board or rack e.g[0,1] = [row, col]
         self.selected_position = None
