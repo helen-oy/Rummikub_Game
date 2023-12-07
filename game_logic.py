@@ -100,6 +100,7 @@ class Player:
         self.name = name
         self.turn = False # when 
         self.is_greater_30 = False
+        self.toss = None
     
     def __str__(self):
         return f"Name: {self.name} Turn: {self.turn}"
@@ -119,6 +120,10 @@ class Player:
 
     def get_tiles(self):
         return self.rack.tiles
+    
+    def player_toss(self,pool):
+        self.toss = random.choice(pool.tiles)
+        return self.toss.value
 
 
 class AIPlayer(Player): # still working on it, Praise make changes
@@ -503,6 +508,10 @@ def scan_rack_odds(player):
 def scan_rack_evens(player):
     even_tiles = [t for t in player.rack.tiles if t is not None and t.value%2==0]
     return even_tiles
+
+def who_plays_first(player,pool):
+    random_pick = random.choice(pool)
+
 
 # tile1 = Tile(2, BLUE)
 # tile2 = Tile(4, BLUE)
