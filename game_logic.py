@@ -137,8 +137,8 @@ class AIPlayer(Player): # still working on it, Praise make changes
         from itertools import permutations # so we can easily generate arrangements of tiles in the rack and find possible moves
     
         min_size = 3 # the minimum size of a possible move. 
-        max_size = 5 # the maximum size of a possible move.
-        depth = 8 # how far the computer should go in its quest to find valid possible moves. At a depth of 5, the computer (if that many exist) would find the 5 highest scoring moves. 
+        max_size = 3 # the maximum size of a possible move.
+        depth = 9 # how far the computer should go in its quest to find valid possible moves. At a depth of 5, the computer (if that many exist) would find the 5 highest scoring moves.
 
         all_sets = [scan_rack_odds(which_player), scan_rack_evens(which_player),scan_rack_group(which_player)]
         # rack = copy.deepcopy(which_player.rack.tiles)  # Deep copy to avoid modifying the original rack. The computer removes tiles from this rack to know what the next highest scoring move will be after it has played the first.
@@ -165,13 +165,17 @@ class AIPlayer(Player): # still working on it, Praise make changes
             moves_to_play.append(highest_combo) # add the highest combo as the first move in moves to play.
 
             new_rack = [tile for tile in rack if tile not in highest_combo] # Remove tiles that make up the highest move from the rack so that rack is different on next iteration
-            new_same = [tile for tile in all_sets[2] if tile not in highest_combo]
-            all_sets[2] = new_same
+            #new_same = [tile for tile in all_sets[2] if tile not in highest_combo]
+            #all_sets[2] = new_same
 
             if depth == 6:
                 new_rack = all_sets[1]
             elif depth == 3:
-                new_rack = all_sets[2] 
+                new_rack = all_sets[2]
+
+            print("see if new rack changed")
+            for tile in new_rack:
+                print(tile)
 
             find_highest_move(new_rack, depth - 1, all_sets, moves_to_play) # Call the function within itself but with the updated rack
 
@@ -183,6 +187,10 @@ class AIPlayer(Player): # still working on it, Praise make changes
         moves_to_play = self.get_rack_moves(which_player) # get all the groups and runs that can be formed from the tiles in player rack
         needed_spaces = [(len(move) + 2) for move in moves_to_play] # get the space we need to play our moves. plus 2 to allow space between moves already on the gameboard
 
+        print(len(moves_to_play))
+        for move in moves_to_play:
+            for tile in move:
+                print(tile)
         position_in_rack = [] # list to store the positions of the tiles in the rack
         position_in_board = [] # list to store the where we want to place our tiles on the board.
 
@@ -226,19 +234,19 @@ class AIPlayer(Player): # still working on it, Praise make changes
                                 break # break out of the loop since the move has been addressed and we are looking for space all over again. Also we are not iterating over moves_to_play as we are modifying it
                     empty_spaces = [] # if the empty_spaces we found so far (by the time we ran into a tile) isn't long enough for any of our moves, reset it as well.
                 
-            if empty_spaces: # if we have a bunch of empty spaces by the time we reach the end of our row (this might be redundant, I'm not sure)
-                for move in moves_to_play:
-                    if len(move) == len(empty_spaces) - 2:
-                        needed_spaces.remove(len(empty_spaces))
-                        for tile in move:
-                            position_in_rack.append(tile.position[1])
-                        for i in range(1, len(empty_spaces) - 1):
-                            position_in_board.append(empty_spaces[i])
-
-                            empty_spaces = []
-                            moves_to_play.remove(move)
-
-                            break
+            # if empty_spaces: # if we have a bunch of empty spaces by the time we reach the end of our row (this might be redundant, I'm not sure)
+            #     for move in moves_to_play:
+            #         if len(move) == len(empty_spaces) - 2:
+            #             needed_spaces.remove(len(empty_spaces))
+            #             for tile in move:
+            #                 position_in_rack.append(tile.position[1])
+            #             for i in range(1, len(empty_spaces) - 1):
+            #                 position_in_board.append(empty_spaces[i])
+            #
+            #                 empty_spaces = []
+            #                 moves_to_play.remove(move)
+            #
+            #                 break
             empty_spaces = []
         print("find move says rack to board is", len(position_in_rack), len(position_in_board))
         return [position_in_rack, position_in_board]
@@ -341,6 +349,8 @@ class AIPlayer(Player): # still working on it, Praise make changes
                                     tile_pos_in_rack.append(rack_tile.position[1])
                                     tile_pos_for_board.append([i, j-1])
                                     found_match = True
+                            #else:
+                                #needed_spaces = len(sublist) + 2
                         elif 4 > j > 0:
                             if game_board[i][j - 1] is None:
                                 if rack_tile.position[1] not in tile_pos_in_rack:
@@ -410,7 +420,7 @@ class GameBoard:
 
         if status:  # if status is true after we have looped through the board, then the board is valid. So we update the gameboard and end the player's turn
             self.board = copy.deepcopy(game_board)
-            current_player.turn = False
+            # current_player.turn = False
 
         return [status, invalid_positions] # return the board status and invalid positions. this will be [True, []] when board is valid.
 
@@ -457,18 +467,21 @@ def is_valid_move(list_of_tiles,player):
         return is_group(list_of_tiles) or is_run(list_of_tiles)
 
 # list_of_players contains all the players in the game in order of their decided turns
-def change_turns(list_of_players, Current_Player,Next_Player): 
-	if Current_Player.turn == False: # If it is no longer the current player's turn
-		index = list_of_players.index(Current_Player) # get the position of the current player in list of players
-		Next_Player.turn = True # set the next player's turn to true
-		Current_Player = Next_Player # update the current player
-		if index < len(list_of_players) - 1: # as long as we have not reached the end of our list of players
-			new_index = list_of_players.index(Current_Player) + 1 # the next player is the player beside our updated current player
-		else:
-			new_index = 0 # else if we have reached the end of the list, cycle back to the first player
-		Next_Player = list_of_players[new_index] # update the next player
-	return Current_Player, Next_Player # return the current and next player so that their values can be set outside the function
+# def change_turns(list_of_players, Current_Player,Next_Player):
+# 	if Current_Player.turn == False: # If it is no longer the current player's turn
+# 		index = list_of_players.index(Current_Player) # get the position of the current player in list of players
+# 		Next_Player.turn = True # set the next player's turn to true
+# 		Current_Player = Next_Player # update the current player
+# 		if index < len(list_of_players) - 1: # as long as we have not reached the end of our list of players
+# 			new_index = list_of_players.index(Current_Player) + 1 # the next player is the player beside our updated current player
+# 		else:
+# 			new_index = 0 # else if we have reached the end of the list, cycle back to the first player
+# 		Next_Player = list_of_players[new_index] # update the next player
+# 	return Current_Player, Next_Player # return the current and next player so that their values can be set outside the function
 
+def toggle_players(player_1, player_2): #simple function to toggle player turns. Use this instead of change turns since game is not multiplayer
+    player_1.turn = not player_1.turn
+    player_2.turn = not player_2.turn
 def is_empty(game_board):
     return all(all(x == game_board[0][0] for x in row) for row in game_board) # if every element in a row is same as the first element and every row is the same as the first row
 

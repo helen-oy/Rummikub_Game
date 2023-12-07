@@ -1,4 +1,4 @@
-from game_logic import Pool, Player, GameBoard, AIPlayer
+from game_logic import Pool, Player, GameBoard, AIPlayer, toggle_players
 
 
 class GamePlay:
@@ -47,7 +47,9 @@ class GamePlay:
         self.remaining_tiles_in_pool = self.pool.remaining_tiles()
         self.drawn_tiles_from_pool = []
 
-
+    @staticmethod
+    def toggle_players(player_1, player_2):
+        toggle_players(player_1, player_2)
 
 
 

@@ -249,7 +249,7 @@ class GameRects:
         play_me_surface = Surface((35, 35))
         play_me_surface.fill((0, 0, 0))
         play_me_rect = play_me_surface.get_rect()
-        play_me_rect = (screen_width * 0.93, screen_height * 0.85)
+        play_me_rect.topleft = (screen_width * 0.93, screen_height * 0.85)
         game_font_size_10 = font.SysFont('arial', 10, bold=True)
         text = game_font_size_10.render("Auto Play", True, (255, 0, 255))
         text_rect = text.get_rect()

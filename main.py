@@ -32,6 +32,7 @@ computer_player = game_play.comp_player
 
 computer_player.turn = True  # testing purposes
 computer_player.is_greater_30 = True  # testing purposes
+user_player.is_greater_30 = True # testing purposes
 
 running = True
 while running:
@@ -124,11 +125,11 @@ while running:
 
     if computer_player.turn:
         game_events.handle_computer_moves(computer_player)
-        computer_player.turn = False
-
-    if not computer_player.turn:
-        game_events.handle_computer_moves(user_player)
-        computer_player.turn = True
+    #     computer_player.turn = False
+    #
+    # if not computer_player.turn:
+    #     game_events.handle_computer_moves(user_player)
+    #     computer_player.turn = True
 
     # show pick tile
 
