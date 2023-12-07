@@ -190,19 +190,8 @@ class AIPlayer(Player): # still working on it, Praise make changes
         moves_to_play = self.get_rack_moves(which_player) # get all the groups and runs that can be formed from the tiles in player rack
         needed_spaces = [(len(move) + 2) for move in moves_to_play] # get the space we need to play our moves. plus 2 to allow space between moves already on the gameboard
 
-        print(len(moves_to_play))
-        for move in moves_to_play:
-            for tile in move:
-                print(tile)
         position_in_rack = [] # list to store the positions of the tiles in the rack
         position_in_board = [] # list to store the where we want to place our tiles on the board.
-
-        if len(moves_to_play) < 1:
-            print("No moves to play")
-        else:
-            for move in moves_to_play:
-                for tile in move:
-                    print(tile)
 
         if is_empty(game_board): # if the gameboard is empty, we can place tiles anywhere.
             i, j = 0, 0
