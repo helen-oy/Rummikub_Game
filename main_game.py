@@ -28,9 +28,9 @@ def main_game():
     user_player = game_play.player
     computer_player = game_play.comp_player
 
-    user_player.turn = True  # testing purposes
-    computer_player.is_greater_30 = True  # testing purposes
-    user_player.is_greater_30 = True  # testing purposes
+    user_player.turn = True  # testing purposes. Implement toss here
+    # computer_player.is_greater_30 = True  # testing purposes
+    # user_player.is_greater_30 = True  # testing purposes
 
     time.set_timer(every_second_timer_tick_event, 1000)
 
