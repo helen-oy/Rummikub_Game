@@ -39,67 +39,117 @@ blue = (0, 0, 255)
 pink = (238, 162, 173)
 UoNblue = (25, 12, 112)
 beige = (255, 211, 155)
+maroon =(128,0,0)
 
-# define rectangle
+#define rectangle
 x = 200
 y = 450
 
-# define fonts
-font = pygame.font.Font('Milk And Honey.ttf', 100)
+#sounds and effects.
+SOUNDON =pygame.image.load("soundon.png")
+HOVERING_SOUNDOFF =pygame.image.load("soundoff.png")
+
+
+#sound button
+SOUNDON_BUTTON = Button2(SOUNDON, 60,713)
+HOVERING_SOUNDOFF_BUTTON = Button2(HOVERING_SOUNDOFF, 60,713)
+
+#define fonts
+font =pygame.font.Font('Milk And Honey.ttf', 100)
 regularFont = pygame.font.Font('Sweet Vusstain.ttf', 65)
 
-# screens and captions
+#screens and captions
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("First display page")
 
-# sounds and effects.
+
+#sounds and effects.
 # sound= pygame.mixer.Sound('Dave-Ft-Burna-Boy-Location.mp3')
 
 
-# define fonts
-font = pygame.font.Font('Milk And Honey.ttf', 100)
+#define fonts
+font =pygame.font.Font('Milk And Honey.ttf', 100)
 regularFont = pygame.font.Font('Sweet Vusstain.ttf', 65)
-loading_font = pygame.font.Font(None, 36)
+loading_font =pygame.font.Font(None, 36)
 
-# define clock
+#define clock
 clock = pygame.time.Clock()
 fps = 60
 
 IMAGE = pygame.image.load('UoNLogo.png')
 IMAGE = pygame.transform.scale_by(IMAGE, 0.4)
 
-# create a text surface object
-text = font.render("Rummikub", True, red)
+#create a text surface object
+text =font.render("Rummikub", True, red)
 
-# create rectangular object for text
+#create rectangular object for text
 textRect = text.get_rect()
 
-# set the center of the rectangular object
-textRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50)
+#set the center of the rectangular object
+textRect.center =(SCREEN_WIDTH//2,SCREEN_HEIGHT//2-50)
 
-# Resume text to show start of game after loading:
+
+#Resume text to show start of game after loading:
 finished = regularFont.render("Start Game", True, "purple")
 finished_rect = finished.get_rect(center=(550, 400))
+
+
+# create rectangle for username
+input_rect = pygame.Rect(200, 200, 140, 32)
+
 
 
 def get_font(size):
     return pygame.font.Font('Sweet Vusstain.ttf', size)
 
 
+
+base_font = pygame.font.Font(None, 32)
+username = " "
+
+# create rectangle for username
+input_rect = pygame.Rect(200, 200, 140, 32)
+
+# gets active input box
+color_active = pygame.Color('lightskyblue3')
+
+# color of input box.
+color_passive =pygame.Color('chartreuse4')
+
+color_passive = pygame.Color('chartreuse4')
+color = color_passive
+active = False
+
+
 def run_game():
     # render text
     pygame.display.set_caption("initialize game")
 
-    screen.fill((0, 0, 230))
+    screen.fill(maroon)
 
     IMAGE = pygame.image.load('UoNLogo.png')
     IMAGE = pygame.transform.scale_by(IMAGE, 0.4)
 
-    text = font.render("Rummikub", True, red)
+    SOUNDON = pygame.image.load("soundon.png")
+
+    HOVERING_SOUNDOFF = pygame.image.load("soundoff.png")
+
+    # sound buttons
+    SOUNDON_BUTTON = Button2(SOUNDON, 60, 713)
+
+    HOVERING_SOUNDOFF_BUTTON = Button2(HOVERING_SOUNDOFF, 60, 713)
+
+    # sound effect
+    SOUNDON_SFX = pygame.mixer.Sound("backgroundmusic.mp3")
+    HOVERING_SOUNDOFF_SFX = pygame.mixer.Sound("ping-sound 1.mp3")
+
+    text = font.render("Rummikub", True, beige)
     textRect = text.get_rect()
     textRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50)
 
     screen.blit(IMAGE, (0, 0))
+    # screen.blit(SOUNDON,(0,630))
+    # screen.blit(SOUNDOFF,(0,713))
     screen.blit(text, textRect)
 
     # Loading bar
@@ -107,32 +157,111 @@ def run_game():
     pygame.draw.rect(screen, pygame.Color('yellow'), (250, 450, loading_progress, 10), border_radius=5)
 
     # loading text
-    loading_text = loading_font.render("Loading ...", True, wine)
+    loading_text = loading_font.render("Loading ...", True, UoNblue)
     loading_rect = loading_text.get_rect(center=(SCREEN_WIDTH // 2, 435))
     screen.blit(loading_text, loading_rect)
+
+    playsound = False
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if SOUNDON_BUTTON.checkForInput(pygame.mouse.get_pos()):
+                playsound = not playsound
+                if playsound:
+                    SOUNDON_SFX.play()
+                else:
+                    SOUNDON_SFX.stop()
+
+    SOUNDON_BUTTON.update(screen)
+    # HOVERING_SOUNDOFF_BUTTON.update(screen)
+
+    if SOUNDON_BUTTON.checkForInput(pygame.mouse.get_pos()):
+        SOUNDON_BUTTON.image = HOVERING_SOUNDOFF
+    else:
+        SOUNDON_BUTTON.image = SOUNDON
+
+    if HOVERING_SOUNDOFF_BUTTON.checkForInput(pygame.mouse.get_pos()):
+        HOVERING_SOUNDOFF_BUTTON.HOVERING_SOUNDOFF = SOUNDON
+    else:
+        HOVERING_SOUNDOFF_BUTTON.image = HOVERING_SOUNDOFF
+
+    pygame.display.update()
+
+
+# Play Screen
+pygame.display.update()
+
+
+# save username to be called other times
+def save_username(username):
+    with open("username.txt", "w") as file:
+        file.write(username)
+
+
+def load_username():
+    if os.path.exists("username.txt"):
+        with open("username.txt", "r") as file:
+            return file.read().strip()
+    return ""
 
 
 # Play Screen
 def play():
     pygame.display.set_caption("Play")
 
+    active = False
+    username = "user"
     while True:
 
         play_mouse_pos = pygame.mouse.get_pos()
 
-        screen.fill(beige)
+        screen.fill(maroon)
 
-        play_text = get_font(50).render("PLAY NOW", True, UoNblue)
-        play_rect = play_text.get_rect(center=(550, 400))
-        screen.blit(play_text, play_rect)
+        # # "PLAY NOW" text
+        # play_text =get_font(50).render("PLAY NOW", True, UoNblue)
+        # play_rect =play_text.get_rect(center =(550, 400))
+        # screen.blit(play_text, play_rect)
 
+        # "BACK" button
         play_back = Button(image=None, pos=(1035, 30), text_input="BACK", font=get_font(50), base_color=UoNblue,
                            hovering_color=wine)
-
-        screen.blit(IMAGE, (0, 0))
-
         play_back.changeColor(play_mouse_pos)
         play_back.update(screen)
+
+        play_now_mouse_pos = pygame.mouse.get_pos()
+
+        # "BACK" button
+        play_now = Button(image=None, pos=(550, 400), text_input="PLAY NOW", font=get_font(50), base_color=UoNblue,
+                          hovering_color=wine)
+        play_now.changeColor(play_now_mouse_pos)
+        play_now.update(screen)
+
+        # UonN IMAGE
+        screen.blit(IMAGE, (0, 0))
+
+        # username input box
+        # create rectangle for username
+        input_rect = pygame.Rect(550, 300, 140, 32)
+        # gets active input box
+        color_active = pygame.Color('lightskyblue3')
+        # color of input box.
+        color_passive = pygame.Color('bisque1')
+        color = color_active if active else color_passive
+        pygame.draw.rect(screen, color, input_rect, 2)
+
+        # "Enter Username:" text
+        enter_username_text = base_font.render("Enter Username:", True, (255, 255, 255))
+        screen.blit(enter_username_text, (input_rect.x - 200, input_rect.y + 5))
+
+        # username text
+        username_surface = base_font.render(username, True, (0, 0, 0))
+        screen.blit(username_surface, (input_rect.x + 20, input_rect.y + 5))
+
+        # width of textfield so that text cannot get outside of user's text input
+        input_rect.w = max(100, username_surface.get_width() + 10)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -142,8 +271,25 @@ def play():
             if event.type == MOUSEBUTTONDOWN:
                 if play_back.checkInput(play_mouse_pos):
                     main_menu()
+                if play_now.checkInput(play_now_mouse_pos):
+                    # name = read name from where they have typed
+                    # if name is not empty
+                    save_username(username)
+                # else
+                # save_username(username)
+                    main_game()
+            if event.type == pygame.KEYDOWN:
+                if active:
+                    # Check for backspace
+                    if event.key == pygame.K_BACKSPACE:
+                        # text input from 0 to -1 i.e. end.
+                        username = username[:-1]
 
-        pygame.display.update()
+                        # Unicode standard string formation
+                    else:
+                        username += event.unicode
+
+            pygame.display.update()
 
 
 def options():
@@ -239,6 +385,7 @@ def main_menu():
                 pygame.quit()
                 sys.exit()
 
+pygame.display.update()
 
 
 # Main game loop
@@ -256,11 +403,6 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-
-        if event.type == pygame.KEYDOWN:
-            if event.type == pygame.K_SPACE:
-                pass
-                # sound.play()
 
     if event.type == pygame.MOUSEMOTION:
         pygame.display.set_caption(str(event.pos))
