@@ -174,13 +174,11 @@ class AIPlayer(Player): # still working on it, Praise make changes
             #all_sets[2] = new_same
 
             if depth == 6:
+                print("update new rack to use evens")
                 new_rack = all_sets[1]
             elif depth == 3:
+                print("update new rack to use same")
                 new_rack = all_sets[2]
-
-            print("see if new rack changed")
-            for tile in new_rack:
-                print(tile)
 
             find_highest_move(new_rack, depth - 1, all_sets, moves_to_play) # Call the function within itself but with the updated rack
 
