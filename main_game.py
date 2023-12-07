@@ -12,7 +12,7 @@ from game_events import GameEvents, every_second_timer_tick_event
 from game_logic import Tile
 from game_play import GamePlay
 
-# init()
+init()
 
 def main_game():
     screen = display.set_mode((screen_width, screen_height))
@@ -108,6 +108,10 @@ def main_game():
         quit_icon = game_surfaces.quit_surface()
         screen.blit(quit_icon[0], quit_icon[1])
 
+        if game_play.show_error_prompt == True:
+            error_prompt = game_surfaces.error_prompt_surface()
+            screen.blit(error_prompt[0], error_prompt[1])
+
         # Rendring remaining tile on pool circle
         for e in event.get():
             if e.type == QUIT:
@@ -120,11 +124,11 @@ def main_game():
             if e.type == every_second_timer_tick_event:
                 game_events.handle_countdown_event()
 
-        text = game_font.render(str(game_play.comp_random_time), True, (255, 255, 255))
-        screen.blit(text, (0, 0))
+        # text = game_font.render(str(game_play.comp_random_time), True, (255, 255, 255))
+        # screen.blit(text, (0, 0))
 
 
         display.update()
 
 
-# main_game()
+main_game()

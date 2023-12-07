@@ -17,6 +17,7 @@ class GameEvents:
 
     def handle_events(self, pos):
         self.handle_quit(pos)
+        self.game_play.show_error_prompt = False
         if self.game_surfaces.show_button[1].collidepoint(pos):
             self.game_play.toggle_comp_tile_visible()
             self.game_surfaces.update_comp_tiles_surfaces()
