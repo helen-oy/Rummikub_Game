@@ -31,6 +31,7 @@ show = False
 
 background = "./board.png"
 game_background = "./background.jpg"
+button = "./b_4.png"
 
 
 class GameRects:
@@ -71,7 +72,7 @@ class GameRects:
 
         self.drawn_pool_tiles_surfaces = []
 
-        #Display remaining_tiles_number in pool
+        # Display remaining_tiles_number in pool
         self.remaining_tile_surface = GameRects.remaining_tile_button(self.game_play.remaining_tiles_in_pool, game_font)
 
         # Game board tiles - (surface, rect)
@@ -84,23 +85,27 @@ class GameRects:
         # Creates game background
         self.game_background_surface = GameRects.create_game_background_surface()
 
+        self.dict = {}
+        # self.dict = GameRects.get_board_rect_dict(game_font,self.game_board_position.x, self.game_board_position.y, show_number=False )
+
     def update_game_state_tiles_surfaces(self):
         self.game_board_tile_surfaces = GameRects.create_board_surfaces(self.game_board_position.x,
                                                                         self.game_board_position.y,
                                                                         self.game_play.game_state,
-                                                                        self.game_font)
+                                                                        self.game_font, self.game_play.invalid_position, self.game_play.selected_game_board_tile_positions)
 
     def update_player_tiles_surfaces(self):
         self.player_tiles_surfaces: List[(Surface, Rect)] = GameRects.create_rack_surfaces(
             self.game_play.player.get_tiles(), self.game_font,
-            self.player_rack_position[1].x, self.player_rack_position[1].y)
+            self.player_rack_position[1].x, self.player_rack_position[1].y,
+            selected_tile_rack_index=self.game_play.selected_rack_tile_index)
 
     def update_comp_tiles_surfaces(self):
         self.comp_tiles_surfaces: List[(Surface, Rect)] = GameRects.create_rack_surfaces(
             self.game_play.comp_player.get_tiles(),
             self.game_font,
             self.comp_rack_position[1].x, self.comp_rack_position[1].y,
-            self.game_play.comp_tile_visible)
+            show_number=self.game_play.comp_tile_visible)
 
     def is_colliding_with_comp_rack(self, pos):
         if self.comp_rack_position[1].collidepoint(pos[0], pos[1]):
@@ -121,19 +126,16 @@ class GameRects:
             return False
 
     def is_colliding_with_drawn_tile(self, pos):
-        for i,tile in enumerate(self.drawn_pool_tiles_surfaces):
+        for i, tile in enumerate(self.drawn_pool_tiles_surfaces):
             print(tile)
             if tile[1].collidepoint(pos):
                 return True
-
-
-
 
     def event_on_player_rack(self, pos):
         # for i, tile in enumerate(player_rack_surfaces):
         #     if tile[1].collidepoint(pos[0], pos[1]) and user_tiles[i] is not None:
         #         print("Selected tile")
-        #         selected_tile = self.game_play.g
+        #         selected_tile_rack = self.game_play.g
         #         user_tile_index_number = i
         pass
 
@@ -145,8 +147,8 @@ class GameRects:
                                                                                self.game_font)
 
     def update_remaining_tiles(self):
-        self.remaining_tile_surface = GameRects.remaining_tile_button(self.game_play.remaining_tiles_in_pool, self.game_font)
-
+        self.remaining_tile_surface = GameRects.remaining_tile_button(self.game_play.remaining_tiles_in_pool,
+                                                                      self.game_font)
 
     @classmethod
     def create_tile_drawn_from_pool(cls, tiles, game_font):
@@ -161,16 +163,20 @@ class GameRects:
         return surface
 
     @classmethod
-    def create_rack_surfaces(cls, tiles, game_font, rack_x, rack_y, show_number=True):
+    def create_rack_surfaces(cls, tiles, game_font, rack_x, rack_y, show_number=True, selected_tile_rack_index=None):
         surfaces = []
         length = len(tiles)
         tiles.extend([None] * (40 - length))
         for i in range(rack_length):
+            selected_tile_rack = False
+            if selected_tile_rack_index == i:
+                selected_tile_rack = True
             col = i % num_of_columns
             row = 0
             if i > 19:
                 row = 1
-            tile_surface = build_tile(tiles[row * rack_num_col + col], game_font, show_number)
+            tile_surface = build_tile(tiles[row * rack_num_col + col], game_font, show_number=show_number,
+                                      selected_tile_rack=selected_tile_rack)
             x_pos = rack_x + (col * tile_width) + 1 + (col * 2)
             y_pos = rack_y + (row * tile_height) + 7 + (row * 2)
             rect = tile_surface.get_rect()
@@ -186,13 +192,22 @@ class GameRects:
         return rack_surface, rack_surface_rect
 
     @classmethod
-    def create_board_surfaces(cls, playing_board_x, playing_board_y, game_state, game_font):
+    def create_board_surfaces(cls, playing_board_x, playing_board_y, game_state, game_font, invalid_position, selected_tile_board_indices):
         rect = []
         for i in range(num_of_rows):
             grid_rect = []
             for j in range(num_of_columns):
+                show_error_tile = False
+                selected_tile_board = False
+                if f"{i},{j}" in invalid_position:
+                    show_error_tile = True
+                if selected_tile_board_indices is not None and selected_tile_board_indices == [i,j]:
+                    selected_tile_board = True
+                    print("true", selected_tile_board_indices, "iram")
+
+
                 tile = game_state[i][j]
-                tile_surface = build_tile(tile, game_font)
+                tile_surface = build_tile(tile, game_font, show_error=show_error_tile, selected_tile_rack_borad = selected_tile_board )
                 # tile_surface.fill((150, 75, 0))
                 # alpha = 50
                 x_position = playing_board_x + 1 + (j * (tile_width + tile_spacing))
@@ -249,7 +264,7 @@ class GameRects:
         play_me_surface = Surface((35, 35))
         play_me_surface.fill((0, 0, 0))
         play_me_rect = play_me_surface.get_rect()
-        play_me_rect = (screen_width * 0.93, screen_height * 0.85)
+        play_me_rect.topleft = (screen_width * 0.93, screen_height * 0.85)
         game_font_size_10 = font.SysFont('arial', 10, bold=True)
         text = game_font_size_10.render("Auto Play", True, (255, 0, 255))
         text_rect = text.get_rect()
@@ -278,17 +293,20 @@ class GameRects:
         return img, img_rect
 
 
-
-
-
-
-
-def build_tile(tile, font, show_number=True):
+def build_tile(tile, font, show_number=True, show_error=False, selected_tile_rack=False, selected_tile_rack_borad = False):
     tile_surface = Surface((42, 50), pygame.SRCALPHA)
     tile_surface = tile_surface.convert_alpha()
     tile_surface.fill((0, 0, 0, 100))
     if tile is not None:
         tile_surface = pygame.image.load('tile.png')
+        if show_error:
+            tile_surface = pygame.image.load('tile_error.png')
+        if selected_tile_rack:
+            tile_surface = pygame.image.load('tile_selected.png')
+        if selected_tile_rack_borad:
+            tile_surface = pygame.image.load('tile_selected.png')
+
+
         tile_surface = pygame.transform.scale(tile_surface, (42, 50))
         number = str(tile.value)
         if not show_number:

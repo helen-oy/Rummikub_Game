@@ -16,9 +16,10 @@ from game_events import GameEvents
 init()
 screen = display.set_mode((screen_width, screen_height))
 clock = time.Clock()
-game_font = font.SysFont('arial', 30, bold=True)
+starting_time = time.get_ticks()
+countdown = 60000
 
-
+game_font = pygame.font.SysFont('arial', 30, bold=True)
 game_play = GamePlay()
 game_surfaces = GameRects(game_play, game_font)
 game_events = GameEvents(game_play, game_surfaces)
@@ -26,6 +27,9 @@ game_events = GameEvents(game_play, game_surfaces)
 # FIX THIS
 pick_tile = game_play.pool.draw_2_tiles()
 remaining_tiles = game_play.pool.remaining_tiles()
+
+#time.set_timer(every_second_timer_tick_event, 1000)
+
 
 running = True
 while running:
@@ -72,12 +76,7 @@ while running:
 
     draw_tile_build = game_surfaces.drawn_pool_tiles_surfaces
     for tile in draw_tile_build:
-
         screen.blit(tile[0], tile[1])
-
-
-
-
 
     for i in range(rack_length):
         comp_rack_tile = comp_rack_surfaces[i]
@@ -102,22 +101,23 @@ while running:
         temp_tiles = computer_tiles
 
 
-
-
-
     # Rendring remaining tile on pool circle
-
-
     for e in event.get():
         if e.type == QUIT:
             running = False
 
         if e.type == MOUSEBUTTONUP:
             pos = mouse.get_pos()
-
             game_events.handle_events(pos)
 
-    # show pick tile
+        # seconds = game_events.handle_timer_events(time, starting_time, countdown)
+        # text = game_font.render(str(seconds), True, (255, 255, 255))
+        # screen.blit(text, (0,0))
 
+
+
+
+
+    # show pick tile
 
     display.update()
