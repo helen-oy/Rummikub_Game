@@ -17,6 +17,7 @@
 # https://youtu.be/_D-_OmR36Pk?si=L24aue5dqPrN-_5D
 
 import pygame, sys, threading, time, math
+import os
 from pygame.locals import *
 from button import Button
 from soundbutton import Button2
@@ -379,7 +380,7 @@ def main_menu():
             sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN:
             if play_button.checkInput(menu_mouse_pos):
-                main_game()
+                play()
             if options_button.checkInput(menu_mouse_pos):
                 options()
             if quit_button.checkInput(menu_mouse_pos):
