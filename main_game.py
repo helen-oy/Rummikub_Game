@@ -12,7 +12,7 @@ from game_events import GameEvents, every_second_timer_tick_event
 from game_logic import Tile
 from game_play import GamePlay
 from game_events import GameEvents, every_second_timer_tick_event
-from LoadingPages import GUI_Rummikub_game
+from LoadingPages import GameOver
 
 
 #init()
@@ -142,8 +142,9 @@ def main_game():
 
         pool_length = game_play.pool.remaining_tiles()
 
+        comp_tiles, player_tiles = computer_player.get_tiles(), user_player.get_tiles()
+
         if pool_length == 0:
-            comp_tiles, player_tiles = computer_player.get_tiles(), user_player.get_tiles()
             comp_sum = 0
             player_sum = 0
 
@@ -163,14 +164,14 @@ def main_game():
             else:
                 winner = "Draw"
 
-            GUI_Rummikub_game.gameover(winner)
+            GameOver.gameover(winner)
 
         if all(tile == player_tiles[0] for tile in player_tiles):
             winner = "user player"
-            GUI_Rummikub_game.gameover(winner)
+            GameOver.gameover(winner)
         elif all(tile == comp_tiles[0] for tile in comp_tiles):
             winner = "computer_player"
-            GUI_Rummikub_game.gameover(winner)
+            GameOver.gameover(winner)
 
         display.update()
 

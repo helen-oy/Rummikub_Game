@@ -429,8 +429,8 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-    if event.type == pygame.MOUSEMOTION:
-        pygame.display.set_caption(str(event.pos))
+        if event.type == pygame.MOUSEMOTION:
+            pygame.display.set_caption(str(event.pos))
     if current_screen == "loading":
         run_game()
         loading_progress += loading_speed
