@@ -31,7 +31,7 @@ show = False
 
 circle_diameter = 65
 
-path = "./"
+path = ".././"
 background = path+"board.png"
 game_background = path+"background.jpg"
 button = path+"b_4.png"

@@ -12,7 +12,7 @@ from game_events import GameEvents, every_second_timer_tick_event
 from game_logic import Tile
 from game_play import GamePlay
 
-init()
+#init()
 
 def main_game():
     screen = display.set_mode((screen_width, screen_height))
@@ -131,4 +131,4 @@ def main_game():
         display.update()
 
 
-main_game()
+
