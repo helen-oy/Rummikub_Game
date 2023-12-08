@@ -143,8 +143,7 @@ def main_game():
 
         comp_tiles, player_tiles = computer_player.get_tiles(), user_player.get_tiles()
 
-        if pool_length == 0:
-            print ("skibidee yes yes yes")
+        if pool_length == 1:
             comp_sum = 0
             player_sum = 0
 
