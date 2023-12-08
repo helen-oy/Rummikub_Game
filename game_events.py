@@ -77,7 +77,6 @@ class GameEvents:
             self.game_surfaces.update_remaining_tiles()
             self.game_surfaces.update_game_state_tiles_surfaces()
 
-
     def handle_computer_moves(self,
                               which_player):  # The computer makes moves for which_player. which_player could be itself or the human player.
         user_player = self.game_play.player
@@ -96,12 +95,17 @@ class GameEvents:
 
         if len(tile_positions) > 0:  # if there are moves on the rack
 
-            for k in range(len(tile_positions)):  # we loop for the length of indexes in our rack of tiles we want to play.
-                self.selected_rack_tile_index = tile_positions[k]  # the index of the tile in our rack updates going from the first element in our list of indexes when k = 0
-                i, j = board_positions[k]  # for each tile found at the given index in our rack, where we want to play it on the board corresponds with board positions at k
+            for k in range(
+                    len(tile_positions)):  # we loop for the length of indexes in our rack of tiles we want to play.
+                self.selected_rack_tile_index = tile_positions[
+                    k]  # the index of the tile in our rack updates going from the first element in our list of indexes when k = 0
+                i, j = board_positions[
+                    k]  # for each tile found at the given index in our rack, where we want to play it on the board corresponds with board positions at k
                 if self.selected_rack_tile_index is not None:
-                    self.game_play.update_game_state(tiles_to_use[self.selected_rack_tile_index], i,j)  # update the game state with the tile found at the given index and place it  in the specified board position
-                    if isinstance(which_player, game_play.AIPlayer):  # if whichplayer is the ai player update the ai player's rack
+                    self.game_play.update_game_state(tiles_to_use[self.selected_rack_tile_index], i,
+                                                     j)  # update the game state with the tile found at the given index and place it  in the specified board position
+                    if isinstance(which_player,
+                                  game_play.AIPlayer):  # if whichplayer is the ai player update the ai player's rack
                         self.game_play.comp_player.remove_tile(self.selected_rack_tile_index)
                         self.game_surfaces.update_comp_tiles_surfaces()
                     else:  # if which player is not the AI player, then udate the human player's rack instead
@@ -116,7 +120,8 @@ class GameEvents:
         else:
             no_moves_played += 1  # if there were no rack moves, take note so we can know if computer did not play anything at all and so needs to pick
 
-        board_extensions = computer_player.extend_board(which_player, game_board)  # repeat the same logic but for board extensions
+        board_extensions = computer_player.extend_board(which_player,
+                                                        game_board)  # repeat the same logic but for board extensions
 
         tile_positions = board_extensions[0]
         board_positions = board_extensions[1]
@@ -193,12 +198,13 @@ class GameEvents:
                 selected_tile_pos = self.game_play.selected_game_board_tile_positions
                 selected_tile = self.game_play.game_state[selected_tile_pos[0]][selected_tile_pos[1]]
                 # for i, tile in enumerate( self.game_play.previous_state):
-                for i, tile in enumerate(self.game_play.previous_state):
-                    if tile is not None and selected_tile.id == tile.id:
+                for rack_tile in self.game_play.previous_state:
+                    if rack_tile is not None and selected_tile.id == rack_tile.id:
                         self.game_play.player.add_tile(selected_tile, i)
                         self.game_play.remove_game_state_tile(selected_tile_pos[0], selected_tile_pos[1])
                         self.game_surfaces.update_game_state_tiles_surfaces()
                         self.game_surfaces.update_player_tiles_surfaces()
+                        self.game_play.updated_selected_tile_index_board(None, None)
 
     def handle_game_board_events(self, pos):
         user_tiles = self.game_play.player.get_tiles()
