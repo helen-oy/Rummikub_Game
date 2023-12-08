@@ -1,8 +1,8 @@
 import pygame
 
 import game_play
-from game_play import GamePlay, Sound
-from game_components import GameRects
+from game_play import GamePlay
+from game_components import GameRects, Sound
 import random
 
 music = Sound()
@@ -21,6 +21,7 @@ class GameEvents:
         self.handle_quit(pos)
         self.game_play.show_error_prompt = False
         if self.game_surfaces.show_button[1].collidepoint(pos):
+            music.play_button_click()
             self.game_play.toggle_comp_tile_visible()
             self.game_surfaces.update_comp_tiles_surfaces()
 
@@ -45,8 +46,10 @@ class GameEvents:
             self.game_surfaces.update_remaining_tiles()
 
         elif self.game_surfaces.submit_button[1].collidepoint(pos):
+            music.play_button_click()
             self.submit_button_event()
         elif self.game_surfaces.play_for_me[1].collidepoint(pos):
+            music.play_button_click()
             self.game_play.game_state = self.game_play.game_board.get_copy()
             self.game_play.copy_player_initial_state()
             self.game_surfaces.update_game_state_tiles_surfaces()
@@ -105,6 +108,7 @@ class GameEvents:
                 else:  # if which player is not the AI player, then udate the human player's rack instead
                     self.game_play.player.remove_tile(self.selected_rack_tile_index)
                     self.game_surfaces.update_player_tiles_surfaces()
+                music.play_tile_drop()
                 self.game_surfaces.update_game_state_tiles_surfaces()  # update our visual gameboard, i guess
                 self.selected_rack_tile_index = None
 
@@ -136,6 +140,7 @@ class GameEvents:
                 else:
                     self.game_play.player.remove_tile(self.selected_rack_tile_index)
                     self.game_surfaces.update_player_tiles_surfaces()
+                music.play_tile_drop()
                 self.game_surfaces.update_game_state_tiles_surfaces()
                 self.selected_rack_tile_index = None
 
@@ -157,9 +162,11 @@ class GameEvents:
                         if isinstance(which_player, game_play.AIPlayer):
                             self.game_play.comp_player.add_tile(random_tile, i)
                             self.game_surfaces.update_comp_tiles_surfaces()
+                            music.play_tile_drop()
                         else:
                             self.game_play.player.add_tile(random_tile, i)
                             self.game_surfaces.update_player_tiles_surfaces()
+                            music.play_tile_drop()
                         break
                 self.game_play.toggle_players()
                 # after picking from pool, end turn
