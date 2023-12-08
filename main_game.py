@@ -1,25 +1,24 @@
-from pygame import Surface, MOUSEBUTTONDOWN, MOUSEBUTTONUP, draw, mouse
-from pygame import event
-from pygame import QUIT
-from pygame import init
-from pygame import display
-from pygame import time
-from game_components import build_tile, GameRects, rack_length, screen_width, \
-    screen_height, num_of_rows, num_of_columns, playing_board_width
-from game_components import tile_height
-from pygame import font
-from game_logic import Tile
 import pygame
+from pygame import MOUSEBUTTONUP, mouse
+from pygame import QUIT
+from pygame import display
+from pygame import event
+from pygame import init
+from pygame import time
+
+from game_components import GameRects, rack_length, screen_width, \
+    screen_height, num_of_rows, num_of_columns
+from game_events import GameEvents, every_second_timer_tick_event
+from game_logic import Tile
 from game_play import GamePlay
 from game_events import GameEvents, every_second_timer_tick_event
 from GUI_Rummikub_game import gameover
 
 #init()
 
-screen = display.set_mode((screen_width, screen_height))
-clock = time.Clock()
-
 def main_game():
+    screen = display.set_mode((screen_width, screen_height))
+
     game_font = pygame.font.SysFont('arial', 30, bold=True)
     game_play = GamePlay()
     game_surfaces = GameRects(game_play, game_font)
@@ -34,8 +33,7 @@ def main_game():
 
     time.set_timer(every_second_timer_tick_event, 1000)
 
-    running = True
-    while running:
+    while game_play.running:
 
         # Creating user and player rack surfaces rects
         user_player_rack = game_surfaces.player_rack_position
@@ -51,9 +49,6 @@ def main_game():
 
         user_tiles = user_player.get_tiles()
         computer_tiles = computer_player.get_tiles()
-
-        # Creating circle for pool
-        pool_surface = draw.circle(screen, (0, 0, 0), ((screen_width - playing_board_width) / 4, screen_height / 2), 30)
 
         game_state = game_play.game_state
 
@@ -72,9 +67,6 @@ def main_game():
 
         draw_tiles_button = game_surfaces.draw_tiles_button
         screen.blit(draw_tiles_button[0], draw_tiles_button[1])
-
-        remaining_tiles_surface = game_surfaces.remaining_tile_surface
-        screen.blit(remaining_tiles_surface[0], remaining_tiles_surface[1])
 
         draw_tile_build = game_surfaces.drawn_pool_tiles_surfaces
         for tile in draw_tile_build:
@@ -101,14 +93,31 @@ def main_game():
                 temp_tiles.append(Tile(0, (255, 255, 255)))
         else:
             temp_tiles = computer_tiles
+        remaining_tiles_surface = game_surfaces.remaining_tile_surface
+        screen.blit(remaining_tiles_surface[0], remaining_tiles_surface[1])
 
         time_surface = game_surfaces.get_time()
         screen.blit(time_surface[0], time_surface[1])
 
+        if game_play.player.turn == True:
+            user_icon = game_surfaces.user_icon_surface()
+            screen.blit(user_icon[0], user_icon[1])
+
+        if game_play.comp_player.turn == True:
+            comp_icon = game_surfaces.comuter_icon()
+            screen.blit(comp_icon[0], comp_icon[1])
+
+        quit_icon = game_surfaces.quit_surface()
+        screen.blit(quit_icon[0], quit_icon[1])
+
+        if game_play.show_error_prompt == True:
+            error_prompt = game_surfaces.error_prompt_surface()
+            screen.blit(error_prompt[0], error_prompt[1])
+
         # Rendring remaining tile on pool circle
         for e in event.get():
             if e.type == QUIT:
-                running = False
+                game_play.running = False
 
             if e.type == MOUSEBUTTONUP:
                 pos = mouse.get_pos()
@@ -163,3 +172,6 @@ def main_game():
             gameover(winner)
 
         display.update()
+
+
+

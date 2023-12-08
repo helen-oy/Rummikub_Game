@@ -42,6 +42,13 @@ circle = path + "circle.png"
 tile_image = path + "tile.png"
 tile_error = path + "tile_error.png"
 tile_selected = path + "tile_selected.png"
+play_button = path + "play.png"
+show_button = path + "show.png"
+submit_button = path + "submit.png"
+user_icon = path + "user.png"
+comp_icon = path + "ai.png"
+quit_icon = path + "quit.png"
+error_prompt = path + "error_prompt.png"
 
 
 
@@ -248,66 +255,70 @@ class GameRects:
         return playing_board_surface
 
     @classmethod
+    def quit_surface(cls):
+        quit_surface = pygame.image.load(quit_icon)
+        quit_surface_rect = quit_surface.get_rect()
+        quit_surface_rect.center = (screen_width * 0.95, screen_height * 0.03)
+        return quit_surface, quit_surface_rect
+
+    @classmethod
     def show_tile_button_surface(cls):
-        show_tile = Surface((35, 35))
-        show_tile.fill((0, 0, 0))
-        game_font_size_8 = font.SysFont('arial', 8, bold=True)
-        text = game_font_size_8.render("Show tile", True, (255, 0, 255))
-        text_rect = text.get_rect()
-        text_rect.topleft = (0, 35 * 0.2)
+        show_tile = pygame.image.load(show_button)
         show_tile_rect = show_tile.get_rect()
-        show_tile_rect.topleft = (screen_width * 0.93, screen_height * 0.07)
-        show_tile.blit(text, text_rect)
+        show_tile_rect.topleft = (screen_width * 0.92, screen_height * 0.10)
         return show_tile, show_tile_rect
 
     @classmethod
     def submit_button(cls):
-        submit_surface = Surface((35, 35))
-        submit_surface.fill((0, 0, 0))
+        submit_surface = pygame.image.load(submit_button)
         submit_button_rect = submit_surface.get_rect()
-        submit_button_rect.topleft = (screen_width * 0.93, screen_height * 0.92)
-        game_font_size_10 = font.SysFont('arial', 10, bold=True)
-        text = game_font_size_10.render("submit", True, (255, 0, 255))
-        text_rect = text.get_rect()
-        text_rect.topleft = (0, 35 * 0.2)
-        submit_surface.blit(text, text_rect)
+        submit_button_rect.center = (screen_width * 0.95, screen_height * 0.95)
 
         return submit_surface, submit_button_rect
 
     @classmethod
     def play_for_me(cls):
-        play_me_surface = Surface((35, 35))
-        play_me_surface.fill((0, 0, 0))
+        play_me_surface = pygame.image.load(play_button)
         play_me_rect = play_me_surface.get_rect()
-        play_me_rect.topleft = (screen_width * 0.93, screen_height * 0.85)
-        game_font_size_10 = font.SysFont('arial', 10, bold=True)
-        text = game_font_size_10.render("Auto Play", True, (255, 0, 255))
-        text_rect = text.get_rect()
-        text_rect.topleft = (0, 35 * 0.2)
-        play_me_surface.blit(text, text_rect)
+        play_me_rect.center = (screen_width * 0.95, screen_height * 0.85)
         return play_me_surface, play_me_rect
 
     @classmethod
     def draw_tiles_button(cls):
         draw_tile_surface = pygame.image.load(draw_button)
-
-        # draw_tile_surface = Surface((40, 40))
-        # draw_tile_surface.fill((0, 0, 0))
         draw_tile_surface_rect = draw_tile_surface.get_rect()
-        draw_tile_surface_rect.topleft = (screen_width * 0.03, screen_height * 0.55)
-        # game_font_size_10 = font.SysFont('arial', 10, bold=True)
-        # text = game_font_size_10.render("Draw Tile", True, (255, 0, 255))
-        # text_rect = text.get_rect()
-        # text_rect.topleft = (0, 35 * 0.2)
-        # draw_tile_surface.blit(text, text_rect)
+        draw_tile_surface_rect.topleft = (screen_width * 0.02, screen_height * 0.55)
         return draw_tile_surface, draw_tile_surface_rect
 
     @classmethod
+    def user_icon_surface(cls):
+        user_icon_surface = pygame.image.load(user_icon)
+        user_icon_surface_rect = user_icon_surface.get_rect()
+        user_icon_surface_rect.topleft = (screen_width * 0.02, screen_height * 0.87)
+        return user_icon_surface, user_icon_surface_rect
+
+    @classmethod
+    def comuter_icon(cls):
+        comp_icon_surface = pygame.image.load(comp_icon)
+        comp_icon_surface_rect = comp_icon_surface.get_rect()
+        comp_icon_surface_rect.topleft = (screen_width * 0.02, screen_height * 0.06)
+        return comp_icon_surface,  comp_icon_surface_rect
+
+
+
+
+
+
+    @classmethod
     def remaining_tile_button(cls, remaining_tile, font):
-        img = font.render(str(remaining_tile), True, (255, 255, 0))
+        remaining_tile_surface = pygame.image.load(circle)
+        remaining_tile_surface_rect = remaining_tile_surface.get_rect()
+        remaining_tile_surface_rect.center = ((screen_width - playing_board_width) / 4, screen_height / 2)
+        img = font.render(str(remaining_tile), True, (255, 255, 255))
         img_rect = img.get_rect()
-        img_rect.center = ((screen_width - playing_board_width) / 4, screen_height / 2)
-        return img, img_rect
+        img_rect.center = (circle_diameter * 0.5, circle_diameter * 0.5)
+        remaining_tile_surface.blit(img, img_rect)
+        return remaining_tile_surface,  remaining_tile_surface_rect
 
     @classmethod
     def time_surface(cls, time, game_font):
@@ -320,6 +331,13 @@ class GameRects:
         time_surface.blit(text, text_rect)
 
         return time_surface, time_rect
+
+    @classmethod
+    def error_prompt_surface(cls):
+        error_prompt_surface = pygame.image.load(error_prompt)
+        error_prompt_surface_rect = error_prompt_surface.get_rect()
+        error_prompt_surface_rect.center =(screen_width * 0.5, screen_height * 0.5)
+        return error_prompt_surface, error_prompt_surface_rect
 
 
 
