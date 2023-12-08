@@ -479,8 +479,11 @@ def is_valid_move(list_of_tiles, player):
     if player.is_greater_30 == False:
         passed = is_more_than_30(list_of_tiles)
         if passed:
-            player.is_greater_30 = True
-            return is_group(list_of_tiles) or is_run(list_of_tiles)
+            if is_group(list_of_tiles) or is_run(list_of_tiles):
+                player.is_greater_30 = True
+                return True
+            else:
+                return False
         else:
             return passed
     else:
