@@ -18,6 +18,8 @@ class GameEvents:
         self.show = True
 
     def handle_events(self, pos):
+        if self.game_play.pool.remaining_tiles() == 0:
+            return
         self.handle_quit(pos)
         self.game_play.show_error_prompt = False
         if self.game_surfaces.show_button[1].collidepoint(pos):
@@ -40,6 +42,7 @@ class GameEvents:
             self.game_surfaces.update_drawn_pool_tiles()
 
         elif self.game_surfaces.is_colliding_with_drawn_tile(pos):
+            music.play_button_click()
             self.handle_pool_event(pos)
             self.game_play.reset_draw()
             self.game_surfaces.update_drawn_pool_tiles()
@@ -93,32 +96,27 @@ class GameEvents:
 
         if len(tile_positions) > 0:  # if there are moves on the rack
 
-            for k in range(
-                    len(tile_positions)):  # we loop for the length of indexes in our rack of tiles we want to play.
-                self.selected_rack_tile_index = tile_positions[
-                    k]  # the index of the tile in our rack updates going from the first element in our list of indexes when k = 0
-                i, j = board_positions[
-                    k]  # for each tile found at the given index in our rack, where we want to play it on the board corresponds with board positions at k
-                self.game_play.update_game_state(tiles_to_use[self.selected_rack_tile_index], i,
-                                                 j)  # update the game state with the tile found at the given index and place it  in the specified board position
-                if isinstance(which_player,
-                              game_play.AIPlayer):  # if whichplayer is the ai player update the ai player's rack
-                    self.game_play.comp_player.remove_tile(self.selected_rack_tile_index)
-                    self.game_surfaces.update_comp_tiles_surfaces()
-                else:  # if which player is not the AI player, then udate the human player's rack instead
-                    self.game_play.player.remove_tile(self.selected_rack_tile_index)
-                    self.game_surfaces.update_player_tiles_surfaces()
-                music.play_tile_drop()
-                self.game_surfaces.update_game_state_tiles_surfaces()  # update our visual gameboard, i guess
-                self.selected_rack_tile_index = None
+            for k in range(len(tile_positions)):  # we loop for the length of indexes in our rack of tiles we want to play.
+                self.selected_rack_tile_index = tile_positions[k]  # the index of the tile in our rack updates going from the first element in our list of indexes when k = 0
+                i, j = board_positions[k]  # for each tile found at the given index in our rack, where we want to play it on the board corresponds with board positions at k
+                if self.selected_rack_tile_index is not None:
+                    self.game_play.update_game_state(tiles_to_use[self.selected_rack_tile_index], i,j)  # update the game state with the tile found at the given index and place it  in the specified board position
+                    if isinstance(which_player, game_play.AIPlayer):  # if whichplayer is the ai player update the ai player's rack
+                        self.game_play.comp_player.remove_tile(self.selected_rack_tile_index)
+                        self.game_surfaces.update_comp_tiles_surfaces()
+                    else:  # if which player is not the AI player, then udate the human player's rack instead
+                        self.game_play.player.remove_tile(self.selected_rack_tile_index)
+                        self.game_surfaces.update_player_tiles_surfaces()
+                    music.play_tile_drop()
+                    self.game_surfaces.update_game_state_tiles_surfaces()  # update our visual gameboard, i guess
+                    self.selected_rack_tile_index = None
 
             # submit move here
             self.game_play.submit_game_state()  # submit the move we just played
         else:
             no_moves_played += 1  # if there were no rack moves, take note so we can know if computer did not play anything at all and so needs to pick
 
-        board_extensions = computer_player.extend_board(which_player,
-                                                        game_board)  # repeat the same logic but for board extensions
+        board_extensions = computer_player.extend_board(which_player, game_board)  # repeat the same logic but for board extensions
 
         tile_positions = board_extensions[0]
         board_positions = board_extensions[1]
@@ -133,16 +131,17 @@ class GameEvents:
             for k in range(len(tile_positions)):
                 self.selected_rack_tile_index = tile_positions[k]
                 i, j = board_positions[k]
-                self.game_play.update_game_state(tiles_to_use[self.selected_rack_tile_index], i, j)
-                if isinstance(which_player, game_play.AIPlayer):
-                    self.game_play.comp_player.remove_tile(self.selected_rack_tile_index)
-                    self.game_surfaces.update_comp_tiles_surfaces()
-                else:
-                    self.game_play.player.remove_tile(self.selected_rack_tile_index)
-                    self.game_surfaces.update_player_tiles_surfaces()
-                music.play_tile_drop()
-                self.game_surfaces.update_game_state_tiles_surfaces()
-                self.selected_rack_tile_index = None
+                if self.selected_rack_tile_index is not None:
+                    self.game_play.update_game_state(tiles_to_use[self.selected_rack_tile_index], i, j)
+                    if isinstance(which_player, game_play.AIPlayer):
+                        self.game_play.comp_player.remove_tile(self.selected_rack_tile_index)
+                        self.game_surfaces.update_comp_tiles_surfaces()
+                    else:
+                        self.game_play.player.remove_tile(self.selected_rack_tile_index)
+                        self.game_surfaces.update_player_tiles_surfaces()
+                    music.play_tile_drop()
+                    self.game_surfaces.update_game_state_tiles_surfaces()
+                    self.selected_rack_tile_index = None
 
             # submit move here
             self.game_play.submit_game_state()
@@ -178,11 +177,13 @@ class GameEvents:
         user_tile_surfaces = self.game_surfaces.player_tiles_surfaces
         for i, tile in enumerate(user_tile_surfaces):
             if tile[1].collidepoint(pos) and user_tiles[i] is not None:
+                music.play_tile_select()
                 self.game_play.updated_selected_tile_index(i)
                 self.game_surfaces.update_player_tiles_surfaces()
 
             elif tile[1].collidepoint(pos) and self.game_play.selected_rack_tile_index is not None:
                 if user_tiles[i] is None:
+                    music.play_tile_drop()
                     self.game_play.player.add_tile(user_tiles[self.game_play.selected_rack_tile_index], i)
                     self.game_play.player.remove_tile(self.game_play.selected_rack_tile_index)
                     self.game_surfaces.update_player_tiles_surfaces()
@@ -205,8 +206,11 @@ class GameEvents:
         for i in range(len(game_board_surfaces)):
             for j in range(len(game_board_surfaces[i])):
                 if game_board_surfaces[i][j][1].collidepoint(pos):
+                    if self.game_play.game_state[i][j] is not None:
+                        music.play_tile_select()
 
                     if self.game_play.selected_rack_tile_index is not None and self.game_play.game_state[i][j] is None:
+                        music.play_tile_drop()
                         self.game_play.update_game_state(user_tiles[self.game_play.selected_rack_tile_index], i, j)
                         self.game_play.player.remove_tile(self.game_play.selected_rack_tile_index)
                         self.game_surfaces.update_player_tiles_surfaces()
@@ -218,6 +222,7 @@ class GameEvents:
 
                     elif self.game_play.selected_game_board_tile_positions is not None and self.game_play.game_state[i][
                         j] is None:
+                        music.play_tile_drop()
                         selected_x, selected_y = self.game_play.selected_game_board_tile_positions
                         self.game_play.update_game_state(self.game_play.game_state[selected_x][selected_y], i, j)
                         self.game_play.remove_game_state_tile(selected_x, selected_y)
@@ -238,6 +243,7 @@ class GameEvents:
                 self.game_play.copy_player_initial_state()
                 self.game_play.game_state = self.game_play.game_board.get_copy()
                 self.game_play.add_drawn_tile_to_rack_from_pool(i)
+                music.play_tile_drop()
                 self.game_play.toggle_players()
                 self.game_surfaces.update_player_tiles_surfaces()
                 self.game_surfaces.update_remaining_tiles()
