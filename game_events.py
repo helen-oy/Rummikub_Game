@@ -1,9 +1,11 @@
 import pygame
 
 import game_play
-from game_play import GamePlay
+from game_play import GamePlay, Sound
 from game_components import GameRects
 import random
+
+music = Sound()
 
 every_second_timer_tick_event = 111
 

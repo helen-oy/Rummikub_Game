@@ -6,6 +6,8 @@ from pygame import font
 
 from game_play import GamePlay
 
+pygame.mixer.init()
+
 screen_width = 1100
 screen_height = 800
 
@@ -346,3 +348,20 @@ def build_tile(tile, font, show_number=True, show_error=False, selected_tile_rac
         # tile_surface.fill((255, 180, 255))
         tile_surface.blit(text_surface, text_rect)
     return tile_surface
+
+class Sound:
+    def __init__(self):        
+        self.tile_select = pygame.mixer.Sound('button-click.wav')
+        self.button_click = pygame.mixer.Sound('277670__coral_island_studios__button-9.wav')
+        self.tile_drop = pygame.mixer.Sound('350496__tris6970__plastic-tile.wav')
+        pygame.mixer.music.set_volume(0.5)  # Adjust volume (0.0 to 1.0)
+        # pygame.mixer.music.play(-1)  # Loop the background music
+
+    def play_tile_select(self):
+        self.tile_select.play()
+    
+    def play_button_click(self):
+        self.button_click.play()
+
+    def play_tile_drop(self):
+        self.tile_drop.play()
