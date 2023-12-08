@@ -14,7 +14,6 @@ from game_play import GamePlay
 from game_events import GameEvents, every_second_timer_tick_event
 from LoadingPages import GameOver
 
-
 #init()
 
 def main_game():
@@ -145,9 +144,9 @@ def main_game():
         comp_tiles, player_tiles = computer_player.get_tiles(), user_player.get_tiles()
 
         if pool_length == 0:
+            print ("skibidee yes yes yes")
             comp_sum = 0
             player_sum = 0
-
 
             for tile in player_tiles:
                 if tile is not None:
