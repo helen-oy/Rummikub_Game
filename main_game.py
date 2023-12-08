@@ -17,10 +17,11 @@ from LoadingPages import GameOver
 
 #init()
 
-def main_game():
+def main_game(username):
     screen = display.set_mode((screen_width, screen_height))
 
     game_font = pygame.font.SysFont('arial', 30, bold=True)
+    game_font_20 = pygame.font.SysFont('arial', 20, bold=True)
     game_play = GamePlay()
     game_surfaces = GameRects(game_play, game_font)
     game_events = GameEvents(game_play, game_surfaces)
@@ -103,6 +104,8 @@ def main_game():
         if game_play.player.turn == True:
             user_icon = game_surfaces.user_icon_surface()
             screen.blit(user_icon[0], user_icon[1])
+            text = game_font_20.render(username, True, (255, 255, 255))
+            screen.blit(text, (user_icon[1][0] + 5, user_icon[1][1]+ 60))
 
         if game_play.comp_player.turn == True:
             comp_icon = game_surfaces.comuter_icon()
@@ -128,8 +131,8 @@ def main_game():
                 game_events.handle_countdown_event()
 
 
-        text = game_font.render(str(game_play.comp_random_time), True, (255, 255, 255))
-        screen.blit(text, (0, 0))
+        # text = game_font.render(str(game_play.comp_random_time), True, (255, 255, 255))
+        # screen.blit(text, (0, 0))
         if computer_player.turn and game_play.comp_random_time == 0:
             game_events.handle_computer_moves(computer_player)
         #     computer_player.turn = False

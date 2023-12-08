@@ -166,7 +166,7 @@ class GameRects:
                                                                                self.game_font)
 
     def update_remaining_tiles(self):
-        self.remaining_tile_surface = GameRects.remaining_tile_button(self.game_play.remaining_tiles_in_pool,self.game_font)
+        self.remaining_tile_surface = GameRects.remaining_tile_button(self.game_play.remaining_tiles_in_pool, self.game_font)
 
     def get_time(self):
         return GameRects.time_surface(self.game_play.timer, self.game_font)
@@ -370,7 +370,7 @@ def build_tile(tile, font, show_number=True, show_error=False, selected_tile_rac
 class Sound:
     def __init__(self):        
         self.tile_select = pygame.mixer.Sound('button-click.wav')
-        self.button_click = pygame.mixer.Sound('277670__coral_island_studios__button-9.wav')
+        self.button_click = pygame.mixer.Sound('277670__coral_island_studios__button-9.mp3')
         self.tile_drop = pygame.mixer.Sound('350496__tris6970__plastic-tile.wav')
         pygame.mixer.music.set_volume(0.5)  # Adjust volume (0.0 to 1.0)
         # pygame.mixer.music.play(-1)  # Loop the background music

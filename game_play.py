@@ -22,7 +22,7 @@ class GamePlay:
         self.selected_game_board_tile_positions = None
         self.comp_random_time = 0
         self.running = True
-        self.show_error_prompt = False
+        self.show_error_prompt = True
 
         # position used for selecting tiles from board or rack e.g[0,1] = [row, col]
         self.selected_position = None
@@ -91,6 +91,7 @@ class GamePlay:
             self.selected_game_board_tile_positions = [row, column]
 
     def add_drawn_tile_to_rack_from_pool(self, selected_pool_tile_index):
+        print(self.drawn_tiles_from_pool)
         for target_index, player_tile in enumerate(self.player.get_tiles()):
             if player_tile is None:
                 self.player.add_tile(self.drawn_tiles_from_pool[selected_pool_tile_index], target_index)
@@ -114,6 +115,7 @@ class GamePlay:
 
     def finalising_user_turn(self):
         self.game_state = self.game_board.get_copy()
+        self.previous_state = self.player.rack_deep_copy()
         self.copy_player_initial_state()
 
     def user_timeout(self):

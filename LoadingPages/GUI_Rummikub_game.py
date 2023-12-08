@@ -252,7 +252,8 @@ def play():
                     # name = read name from where they have typed
                     # if name is not empty
                     save_username(username)
-                    main_game()
+                    username = load_username()
+                    main_game(username)
                 # else
                 # save_username(username)
                 if input_rect.collidepoint(event.pos):
