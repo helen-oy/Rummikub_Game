@@ -95,7 +95,6 @@ class GamePlay:
         for target_index, player_tile in enumerate(self.player.get_tiles()):
             if player_tile is None:
                 self.player.add_tile(self.drawn_tiles_from_pool[selected_pool_tile_index], target_index)
-
                 if selected_pool_tile_index == 0:
                     self.pool.update_pool(self.drawn_tiles_from_pool[1])
                     break
@@ -129,3 +128,22 @@ class GamePlay:
             self.timer = self.timer - 1
         else:
             self.timer = time_limit
+
+    def user_has_moved_tiles(self):
+        for tile in self.previous_state:
+            if tile is None:
+                continue
+
+            found = False
+            for tile_rack in self.player.get_tiles():
+                if tile is not None and tile_rack is not None:
+                    if tile.id == tile_rack.id:
+                        found = True
+                        break
+
+
+
+            if found == False:
+                return True
+        return False
+

@@ -256,14 +256,17 @@ class GameEvents:
                 self.game_surfaces.update_game_state_tiles_surfaces()
 
     def submit_button_event(self):
-        validation = self.game_play.submit_game_state()
-        # self.game_play.finalising_user_turn(validation[0],)
-        if validation[0]:
-            self.game_play.finalising_user_turn()
-            self.game_play.toggle_players()
-        else:
-            self.game_play.invalid_position = validation[1]
-            self.game_surfaces.update_game_state_tiles_surfaces()
+        moved_tiles = self.game_play.user_has_moved_tiles()
+        print(moved_tiles, "checking")
+        if moved_tiles == True:
+            validation = self.game_play.submit_game_state()
+            # self.game_play.finalising_user_turn(validation[0],)
+            if validation[0]:
+                self.game_play.finalising_user_turn()
+                self.game_play.toggle_players()
+            else:
+                self.game_play.invalid_position = validation[1]
+                self.game_surfaces.update_game_state_tiles_surfaces()
 
     def handle_quit(self, pos):
         quit = self.game_surfaces.quit_surface()
