@@ -350,6 +350,63 @@ def main_menu():
                     sys.exit()
         pygame.display.update()
 
+
+def gameover(winner):
+    pygame.display.set_caption("Gameover")
+
+    while True:
+
+        gameover_mouse_pos = pygame.mouse.get_pos()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        screen.fill(maroon)
+
+        IMAGE = pygame.image.load('UoNLogo.png')
+        IMAGE = pygame.transform.scale_by(IMAGE, 0.4)
+
+        screen.blit(IMAGE, (0, 0))
+
+        # BACK BUTTON
+        gameover_back = Button(image=None, pos=(1035, 30), text_input="BACK", font=get_font(50), base_color=UoNblue,
+                               hovering_color=wine)
+        gameover_back.changeColor(gameover_mouse_pos)
+        gameover_back.update(screen)
+
+        gameover_mouse_pos = pygame.mouse.get_pos()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == MOUSEBUTTONDOWN:
+                if gameover_back.checkInput(gameover_mouse_pos):
+                    main_menu()
+
+        # Display congratulations and Gameover  message based on the winner
+        if winner == "computer_player":
+            gameover_text = font.render("GAME OVER !!!", True, UoNblue)
+            congrats_text = get_font(40).render("You lost! \n"
+                                                "Computer player won!\n", True, (255, 211, 155))
+        elif winner == "user player":
+            username == load_username()
+            gameover_text = font.render("GAME OVER !!!")
+            congrats_text = get_font(40).render(f"Congratulations! \n"
+                                                f"{username} won!\n", True, (255, 211, 155))
+        else:
+            gameover_text = font.render("GAME OVER !!!")
+            congrats_text = get_font(40).render("It's a draw! Do you want to play again? Return to main menu", True,
+                                                (255, 211, 155))
+
+        gameover_rect = gameover_text.get_rect(center=(550, 300))
+        screen.blit(gameover_text, gameover_rect)
+
+        congrats_rect = congrats_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+        screen.blit(congrats_text, congrats_rect)
+
+        pygame.display.update()
 # Main game loop
 clock = pygame.time.Clock()
 loading_progress = 0
